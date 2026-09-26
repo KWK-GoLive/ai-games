@@ -172,6 +172,23 @@ function doGet(e) {
       var first = countedRuns_(rows)[nick];
       return json_({ ok: true, taken: !!(first && first.runId !== run) });
     }
+    if (action === "resume") {
+      // Continue a run on another computer: the nickname, class and resume code (= runId) must all match.
+      var g3 = cleanGame_(p.game), nick3 = cleanNick_(p.nickname).toLowerCase(), run3 = clean_(p.runId, 40).toUpperCase();
+      var mine3 = readRows_().filter(function (r) { return r.game === g3 && r.classCode === classCode && r.nickname.toLowerCase() === nick3; });
+      var rows3 = mine3.filter(function (r) { return r.runId.toUpperCase() === run3; });
+      if (!g3 || !rows3.length) return json_({ ok: true, found: false });
+      var first3 = countedRuns_(mine3)[nick3];
+      var seen3 = {}, stages3 = [], team3 = "";
+      rows3.forEach(function (r) {
+        if (r.team) team3 = r.team;
+        if (r.stage < 1 || seen3[r.stage]) return;
+        seen3[r.stage] = true;
+        stages3.push({ stage: r.stage, items: Number(r.items) || 0, correct: Number(r.correct) || 0, points: Number(r.points) || 0, seconds: Number(r.seconds) || 0, hints: Number(r.hints) || 0 });
+      });
+      stages3.sort(function (a, b) { return a.stage - b.stage; });
+      return json_({ ok: true, found: true, counted: !!(first3 && first3.runId.toUpperCase() === run3), team: team3, stages: stages3 });
+    }
     if (action === "rows") {
       // Every row for one class (both games) for the teacher's CSV download. "counted" marks first runs.
       var all = readRows_().filter(function (r) { return r.classCode === classCode; });
