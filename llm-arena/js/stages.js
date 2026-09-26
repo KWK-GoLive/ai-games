@@ -111,37 +111,37 @@
 
   A.start({
     game: "llm",
-    kicker: "Game 2 \u00b7 challenge after Be the LLM",
+    kicker: "Game 3 \u00b7 challenge after Be the LLM",
     title: "LLM Arena",
     intro: [
       "You learned how a language model works. Now be one, against the clock. Each stage gives you a NEW little training text, so you can't rely on memory: you have to think like the model.",
       "The answers are checked by a real toy model running in your browser, the same kind you built in Be the LLM."
     ],
     stages: [
-      { id: "count", name: "Count it", make: wrap(stageFn("count")),
+      { id: "count", icon: "🔢", name: "Count it", make: wrap(stageFn("count")),
         goal: "Training is counting. Read a tiny training text and answer what the model learned from it.",
         rules: ["The model counts which word comes right after each word.", "Percentage = that count \u00f7 all the counts after that word.", "The end of each line counts as a next piece called [end].", "Temperature 0 = always the top count. Ties: reading the text from the top, the word that comes right after it first wins."],
         example: "robot fixed the door\nthe robot opened the box\n\nAfter \u201crobot\u201d: fixed 1, opened 1  \u2192  fixed 50%",
         lesson: "Everything this model \u201cknows\u201d is a table of counts from its training text. Real models learn far richer patterns, but they too are trained on one task: predict the next piece of text." },
-      { id: "greedy", name: "Greedy writer", make: wrap(stageFn("greedy")),
+      { id: "greedy", icon: "✍️", name: "Greedy writer", make: wrap(stageFn("greedy")),
         goal: "Write the whole continuation the model produces at temperature 0, one word at a time.",
         rules: ["The model only remembers the LAST word.", "At each step it writes the word that most often follows it. Ties: reading from the top, the one that comes right after it first wins.", "It stops when it writes [end], or after 8 pieces.", "Part marks: you score the share of pieces you got right before your first slip."],
         example: "Seed: \u201cthe\u201d\nthe \u2192 robot \u2192 fixed \u2192 the \u2192 robot \u2192 \u2026 (a loop!)",
         lesson: "With a tiny memory and no dice, the model can go round in circles. Temperature 0 always gives the same text; real chatbots add some randomness and use a far bigger window, which is why they rarely loop like this." },
-      { id: "dice", name: "Dice master", make: wrap(stageFn("dice")),
+      { id: "dice", icon: "🎲", name: "Dice master", make: wrap(stageFn("dice")),
         goal: "Temperature decides how the model rolls its dice. Work out the chances.",
         rules: ["Temperature 1: plain counts. % = count \u00f7 total.", "Temperature 2: take the square root of each count first (flatter).", "Temperature 0.5: square each count first (sharper).", "Temperature 0: no dice, the top word gets 100%."],
         example: "Counts: cat 9, dog 4, fish 1\nT 1: 9/14 = 64%   T 2: \u221a9=3, \u221a4=2, \u221a1=1 \u2192 cat 3/6 = 50%",
         lesson: "Low temperature makes the model predictable; high temperature makes it more varied (and more likely to pick odd words). The counts never change, only how the dice are weighted." },
-      { id: "keyhole", name: "Keyhole", make: wrap(stageFn("keyhole")),
+      { id: "keyhole", icon: "🔑", name: "Keyhole", make: wrap(stageFn("keyhole")),
         goal: "The context window: how many of the last words the model can see. Change the window, change the answer.",
         rules: ["The model sees ONLY the highlighted last words. The crossed-out words don't exist for it.", "Find those exact words, in order, in the training text, and see what follows them.", "If they never appear together, this model has no data.", "Ties: reading the text from the top, the word that comes right after them first wins."],
         lesson: "A wider window gives the model more to go on, but also more chances that it has never seen that exact wording. Real models learn patterns, so they can still guess well there; they also see thousands of words at once." },
-      { id: "chat", name: "Chat brain", make: wrap(stageFn("chat")),
+      { id: "chat", icon: "💬", name: "Chat brain", make: wrap(stageFn("chat")),
         goal: "A chatbot answers by continuing \u201cQ: \u2026 A:\u201d. Predict its answer, then judge whether the answer is backed by what it was taught.",
         rules: ["The model was trained on the example chats shown. It remembers up to 8 words back.", "For a question it has seen, it copies the answer. For a new one, it finds the longest ending it recognises (like \u201cthe pool open A:\u201d) and continues from there.", "Ties: if two answers could follow, the one higher up in the list of chats wins.", "Supported = the chats contain the same question (maybe worded differently, same question word) with that answer.", "Made up = it borrowed an answer from a different question.", "Half marks for each part."],
         lesson: "This is where made-up answers (hallucinations) come from: the model always continues the text with something that looks like an answer, and it sounds just as sure either way." },
-      { id: "boss", name: "Boss: be the model", make: wrap(stageFn("boss")),
+      { id: "boss", icon: "👑", name: "Boss: be the model", make: wrap(stageFn("boss")),
         goal: "Everything at once. Two-word memory, backing off to one word when needed.",
         rules: ["Look up the last TWO words together and write the word that most often follows.", "If that pair never appears in the text, back off: use only the last word.", "Ties: reading the text from the top, the word that comes right after them first wins. Stop at [end], or after 8 pieces.", "Part marks for the right pieces before your first slip."],
         example: "\u201cthe boat\u201d never appears \u2192 use \u201cboat\u201d \u2192 is\nthen \u201cboat is\u201d \u2192 on \u2026",
@@ -150,9 +150,9 @@
     finalCard: function () {
       return h("section", { class: "card soft stack" },
         h("div", { class: "kicker", text: "Next" }),
-        h("h2", { text: "Be the Agent" }),
-        h("p", { text: "A model only writes text. So how does a chatbot read your files, run tools and make a real Excel file? Find out in the next game." }),
-        h("div", { class: "row end" }, h("a", { class: "btn primary", href: "../be-the-agent/index.html", text: "Play Be the Agent \u2192" })));
+        h("h2", { text: "Watch a real agent" }),
+        h("p", { text: "A model only writes text. So how does a chatbot read your files, run tools and make a real Excel file? First watch a real AI agent do a job, then find out how in Be the Agent." }),
+        h("div", { class: "row end" }, h("a", { class: "btn", href: "../be-the-agent/index.html", text: "Skip to Be the Agent" }), h("a", { class: "btn primary", href: "../pregame-agent/index.html", text: "Watch a real agent \u2192" })));
     }
   });
 })();
