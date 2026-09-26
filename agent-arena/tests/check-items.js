@@ -113,6 +113,44 @@ for (var run = 0; run < RUNS; run++) {
 // the boss file is a real .xlsx (zip)
 var x = F.xlsx([{ name: "E-bikes June", rows: [["Branch", "E-bike revenue"], ["Station", 144], ["River", 60], ["Park", 24], ["Total", { f: "SUM(B2:B4)", v: 228 }]] }]);
 check(x[0] === 0x50 && x[1] === 0x4b, "boss xlsx is a zip");
+/* ---- v3: no typing. Word cards, tap-to-build questions, tap-the-answer ---- */
+var QB = require(path.join(__dirname, "../../shared/querybuilder.js"));
+D.searchQuestions.forEach(function (sq) {
+  var cards = sq.cards || [];
+  check(cards.length === 10 && new Set(cards).size === 10, sq.target + ": 10 different word cards");
+  var wins = cards.filter(function (w) { return I.searchRank(D, w, sq.target).win; });
+  check(wins.length >= 1 && wins.length <= 4, sq.target + ": 1-4 cards win on their own (got " + wins.join(",") + ")");
+  var traps = cards.filter(function (w) { var r = I.searchRank(D, w, sq.target).res; return r[0].score > 0 && r[0].chunk.id !== sq.target; });
+  check(traps.length >= 1, sq.target + ": at least one card pulls up a wrong piece (a trap)");
+});
+// every data question can be built with the chips: numeric column to add up, a text column to split by,
+// a filter column with at most 10 different values, and a value that is one of the chips
+var tbl = E.parseCsv(D.rentalsCsv);
+function uniqVals(c) { var o = []; tbl.rows.forEach(function (r) { if (o.indexOf(r[c]) < 0) o.push(r[c]); }); return o; }
+var numCols = tbl.cols.filter(function (c) { return tbl.rows.every(function (r) { return typeof r[c] === "number"; }); });
+function buildable(cmd) {
+  var m = /^(COUNT ROWS|SHOW 5 ROWS|(TOTAL|MAX|MIN) (\w+)( BY (\w+))?)( WHERE (\w+) ([=<>]) (\S+))?$/.exec(cmd);
+  if (!m) return false;
+  if (m[3] && numCols.indexOf(m[3]) < 0) return false;
+  if (m[5] && (m[2] !== "TOTAL" || numCols.indexOf(m[5]) >= 0)) return false;
+  if (m[7]) {
+    var vals = uniqVals(m[7]).map(String);
+    if (vals.length > 10 || vals.indexOf(m[9]) < 0) return false;
+    if (m[8] !== "=" && numCols.indexOf(m[7]) < 0) return false;
+  }
+  return true;
+}
+D.dataQuestions.forEach(function (dq) {
+  check(buildable(dq.ref), dq.q + ": the reference question can be built with the chips (" + dq.ref + ")");
+  var r = T.run(D.rentalsCsv, dq.ref), key = I.answerOf(D, dq);
+  var tappable = r.groups ? r.groups.map(function (g) { return String(g[0]); }).concat(r.groups.map(function (g) { return String(g[1]); })) : [String(r.value)];
+  check(tappable.indexOf(key) >= 0, dq.q + ": the answer " + key + " can be tapped in the result");
+  check(I.matches(key, key, dq.type, I.namesFor(D, dq)), dq.q + ": a tapped answer is marked right");
+  check(!/TOTAL|WHERE|COUNT ROWS/.test(QB.describe(dq.ref)), dq.q + ": plain English has no command words: " + QB.describe(dq.ref));
+});
+check(QB.describe(I.BOSS_CMD) === "Add up total for each branch, only where bike is ebike", "boss question in plain English");
+check("TOTAL " + "total" + " BY " + "branch" + " WHERE bike = " + "ebike" === I.BOSS_CMD, "the guided builder's right answers give the boss command");
+
 console.log("  " + checked + " checks over " + RUNS + " shuffles; boss wrong-number branch spread: " + JSON.stringify(stats.bossWrong));
 console.log(fails ? fails + " check(s) FAILED" : "All Agent Arena item checks passed");
 process.exit(fails ? 1 : 0);
