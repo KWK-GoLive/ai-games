@@ -53,7 +53,7 @@
         { icon: "🎮", title: "7 short levels", text: "In seven short levels you'll do that job yourself, build a tiny model of your own, and find out how “guess the next word” turns into a chatbot that answers your questions, and why it can sound sure and still be wrong." }
       ]) : null,
       window.VIS ? window.VIS.diagram("nextword") : null,
-      h("p", { class: "muted small", text: "No background needed. About 25–30 minutes. Levels unlock one after another." })));
+      h("p", { class: "muted small", text: "No background needed. About 40–50 minutes; you can stop after any level and carry on later. Levels unlock one after another." })));
 
     var grid = h("div", { class: "levels" });
     levels.forEach(function (def) {

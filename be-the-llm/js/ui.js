@@ -247,6 +247,10 @@
         if (it.rest && it.rest.length) sent.appendChild(h("span", { class: "dim", text: " " + it.rest.join(" ") }));
         fb.className = "feedback " + (ok ? "good" : "bad");
         fb.textContent = (ok ? "✓ Match! The real text said “" : "✗ The real text said “") + M.displayWord(it.answer) + "”.";
+        if (cfg.showProbs && it.tie) {
+          fb.appendChild(h("span", { class: "tie-note", text: " ⚖️ Tie at the top: " + (function (l) { return l.length > 1 ? l.slice(0, -1).join(", ") + " and " + l[l.length - 1] : l[0]; })(it.tie.map(function (x) { return "“" + M.displayWord(x) + "”"; })) +
+            " were seen equally often. This model then takes the one it saw first right after that word in its training text: “" + M.displayWord(it.modelPick) + "”." }));
+        }
         nextBtn.classList.remove("hidden");
         nextBtn.focus();
       }
@@ -296,7 +300,7 @@
    * The model's pick = the choice with the highest probability after the previous word.
    */
   var NOT_ALONE = ["chiang", "mai"]; // halves of a two-word name: never offered as a random distractor
-  function makeItem(model, test, mode, vocab) {
+  function makeItem(model, test, mode, vocab, opts) {
     var w = M.tokenize(test.s);
     var prefix = w.slice(0, test.k), answer = w[test.k];
     var dist = model.next(prefix, 1);
@@ -308,7 +312,12 @@
       return x !== answer && followers.indexOf(x) < 0 && prefix.indexOf(x) < 0 && NOT_ALONE.indexOf(x) < 0;
     }));
     var others;
-    if (mode === "probs") {
+    if (mode === "probs" && opts && opts.showTie) {
+      // A tie round: the two words that share the top count are both on screen (the answer may be one of them).
+      var top2 = dist.filter(function (d) { return d.word !== M.END; }).slice(0, 2).map(function (d) { return d.word; }).filter(function (x) { return x !== answer; });
+      others = top2.concat(shuffle(followers.filter(function (x) { return top2.indexOf(x) < 0; }))).slice(0, 3);
+      while (others.length < 3) others.push(fill.pop());
+    } else if (mode === "probs") {
       // The model's favourite is always on screen (so its pick is visible), plus other words it has
       // seen here drawn from anywhere in its list, so the answer's position doesn't give it away.
       others = followers.slice(0, 1).concat(shuffle(followers.slice(1)).slice(0, 2));
@@ -326,7 +335,9 @@
     for (var d = 0; d < dist.length; d++) {
       if (dist[d].p === bestP && choices.some(function (c) { return c.word === dist[d].word; })) { modelPick = dist[d].word; break; }
     }
-    return { prefix: prefix, answer: answer, rest: w.slice(test.k + 1), choices: choices, modelPick: modelPick };
+    // Tie: another shown choice has exactly the same top chance. This model then takes the word it saw first.
+    var tiedWith = choices.filter(function (c) { return c.word !== modelPick && bestP > 0 && c.p === bestP; }).map(function (c) { return c.word; });
+    return { prefix: prefix, answer: answer, rest: w.slice(test.k + 1), choices: choices, modelPick: modelPick, tie: tiedWith.length ? [modelPick].concat(tiedWith) : null };
   }
 
   /* ---------- chat helpers (Levels 4, 5, 7) ---------- */
