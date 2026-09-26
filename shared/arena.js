@@ -60,6 +60,18 @@
   }
   function pick(arr, rng) { return arr[Math.floor(rng() * arr.length)]; }
   function newId() { return Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e9).toString(36); }
+  /* A run's id doubles as its resume code: 8 easy-to-read characters, e.g. K7Q2-XPMA (no 0/O, 1/I). */
+  var CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  function newCode() {
+    var out = "", buf = new Uint32Array(8);
+    try { crypto.getRandomValues(buf); } catch (e) { for (var j = 0; j < 8; j++) buf[j] = Math.floor(Math.random() * 4294967296); }
+    for (var i = 0; i < 8; i++) { out += CODE_CHARS[buf[i] % CODE_CHARS.length]; if (i === 3) out += "-"; }
+    return out;
+  }
+  function normCode(s) {
+    var c = String(s || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    return c.length === 8 ? c.slice(0, 4) + "-" + c.slice(4) : "";
+  }
 
   /* ---------- the same cleaning rules as the scoreboard script ---------- */
   function cleanText(s, max) {
@@ -173,7 +185,8 @@
 
     /* ---------- runs ---------- */
     function newRun(mode) {
-      return { runId: newId(), seed: newId(), mode: mode, stage: 0, item: 0, results: [], complete: false,
+      var id = newCode();
+      return { runId: id, seed: id, mode: mode, stage: 0, item: 0, results: [], complete: false,
         player: { nickname: st.player.nickname, team: st.player.team, classCode: st.player.classCode } };
     }
     function current() { return st.official && !st.official.complete ? st.official : st.practice && !st.practice.complete ? st.practice : null; }
@@ -191,6 +204,11 @@
       return stages[si].make(makeRng(run.seed + ":" + stages[si].id), { game: def.game });
     }
     function sendsToBoard(run) { return run.mode === "official" && !!URL_ && !!run.player.classCode; }
+    function resumeNote(run) {
+      if (!sendsToBoard(run) || !/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(run.runId)) return null;
+      return h("p", { class: "small muted" }, "Switching computers? Your resume code is ", h("b", { class: "mono", text: run.runId }),
+        ". On the other computer, open this arena, choose \u201cContinue on another computer\u201d and type your nickname, class code and this code. You carry on from the next stage.");
+    }
 
     /* ---------- home ---------- */
     function renderHome() {
@@ -228,6 +246,7 @@
         var c2 = h("section", { class: "card stack" },
           h("div", { class: "kicker", text: run.mode === "official" ? "Your run is in progress" : "Practice run in progress" }),
           h("p", { text: "Playing as " + run.player.nickname + ". You're on stage " + (run.stage + 1) + " of " + stages.length + ", item " + (run.item + 1) + "." }),
+          resumeNote(run),
           (run.cur && run.cur.s === run.stage && run.cur.i === run.item) ? h("p", { class: "muted small", text: "You carry on from the item you were on. Its timer kept running while you were away." }) : null);
         var cont = h("button", { class: "btn primary", type: "button", text: "Continue →", "data-focus": "1" });
         cont.addEventListener("click", function () { go(run); });
@@ -284,6 +303,7 @@
         wrap.appendChild(summary);
       }
       wrap.appendChild(form);
+      if (URL_) wrap.appendChild(resumeForm());
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         if (btn.disabled) return;
@@ -308,6 +328,50 @@
         }).catch(function () { st.queue.push(join); begin(); /* can't reach the scoreboard: play now, send later */ });
       });
       return wrap;
+    }
+
+    /* ---------- continue an official run that was started on another computer ---------- */
+    function resumeForm() {
+      var p0 = getProfile();
+      var rn = h("input", { class: "text-input", id: "rNick", maxlength: "16", autocomplete: "off", value: p0.nickname || st.player.nickname || "" });
+      var rc = h("input", { class: "text-input", id: "rClass", maxlength: "20", autocomplete: "off", value: p0.classCode || st.player.classCode || "" });
+      var rk = h("input", { class: "text-input mono", id: "rCode", maxlength: "12", autocomplete: "off", placeholder: "e.g. K7Q2-XPMA" });
+      var msg = h("p", { class: "feedback", "aria-live": "polite" });
+      var btn = h("button", { class: "btn primary", type: "submit", text: "Continue my run \u2192" });
+      var f = h("form", { class: "stack", novalidate: true },
+        h("label", { class: "field", for: "rNick" }, "Nickname (the same as before)", rn),
+        h("label", { class: "field", for: "rClass" }, "Class code", rc),
+        h("label", { class: "field", for: "rCode" }, "Resume code ", h("span", { class: "muted", text: "(shown after each stage on the other computer)" }), rk),
+        msg, h("div", { class: "row end" }, btn));
+      var det = h("details", { class: "card soft" }, h("summary", { style: "cursor:pointer;font-weight:600", text: "Continue on another computer" }),
+        h("p", { class: "muted small", text: "Started your run on a different computer? Use the resume code from its stage screen. Stages you finished there keep their points; the stage you were in the middle of starts again with new questions." }), f);
+      f.addEventListener("submit", function (e) {
+        e.preventDefault();
+        if (btn.disabled) return;
+        var n = cleanNick(rn.value), cc = cleanClass(rc.value), code = normCode(rk.value);
+        if (!n || !cc) { msg.className = "feedback bad"; msg.textContent = "Please type your nickname and class code."; return; }
+        if (!code) { msg.className = "feedback bad"; msg.textContent = "A resume code has 8 letters or digits, like K7Q2-XPMA."; rk.focus(); return; }
+        btn.disabled = true; msg.className = "feedback muted"; msg.textContent = "Looking up your run\u2026";
+        apiGet({ action: "resume", game: def.game, classCode: cc, nickname: n, runId: code, t: Date.now() }, 20000).then(function (r) {
+          if (!r || !r.ok) throw new Error((r && r.error) || "no answer");
+          if (!r.found) { btn.disabled = false; msg.className = "feedback bad"; msg.textContent = "No run found for that nickname, class code and resume code in this arena. Check all three."; return; }
+          var run = { runId: code, seed: code + "~resumed", mode: "official", stage: 0, item: 0, results: [], complete: false, resumed: true,
+            player: { nickname: n, team: cleanTeam(r.team || ""), classCode: cc } };
+          r.stages.forEach(function (sr) {
+            var arr = [];
+            for (var i = 0; i < sr.items; i++) arr.push({ frac: i < sr.correct ? 1 : 0, points: i === 0 ? sr.points : 0, hint: i < sr.hints, secs: i === 0 ? sr.seconds : 0, imported: true });
+            run.results[sr.stage - 1] = arr;
+          });
+          while (run.stage < stages.length && run.results[run.stage]) run.stage++;
+          run.complete = run.stage >= stages.length;
+          st.player = run.player;
+          setProfile(run.player);
+          if (!r.counted) { st.notCountedRuns = st.notCountedRuns || {}; st.notCountedRuns[code] = true; }
+          st.official = run; persist();
+          go(run);
+        }).catch(function (err) { btn.disabled = false; msg.className = "feedback bad"; msg.textContent = "Can't reach the scoreboard right now (" + err.message + "). Try again in a moment."; });
+      });
+      return det;
     }
 
     /* ---------- run flow ---------- */
@@ -475,6 +539,7 @@
         h("p", { class: "muted", text: ok + " of " + sr.length + " fully right. Total so far: " + runTotals(run).points + " points." }),
         sd.lesson ? h("div", { class: "card soft" }, h("b", { text: "What this stage shows: " }), sd.lesson) : null,
         sendsToBoard(run) ? statusEl() : null,
+        run.complete ? null : resumeNote(run),
         h("div", { class: "row end" }, home, next)));
       next.focus({ preventScroll: true });
       if (run.complete) markSiteDone(def.game + "-arena");
