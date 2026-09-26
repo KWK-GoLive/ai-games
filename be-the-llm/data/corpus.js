@@ -162,7 +162,11 @@ window.BTL_CORPUS = {
     "can you pick me up at the station",
     "can you call me back",
     "please send me the photos",
-    "please call me back"
+    "please call me back",
+    // --- two sums, so the chat model has seen numbers in answers (Level 7) ---
+    "ten plus five is fifteen",
+    "two plus two is four",
+    "my cousin is seventeen"
   ],
 
   // Level 2: the first four training sentences (hand tally of the word after "the")
@@ -202,6 +206,8 @@ window.BTL_CORPUS = {
     ["where did i leave my bag", "you left your bag at the gym", "i left my bag at the gym"],
     ["where did i leave my phone", "you left your phone at the office", "i left my phone at the office"],
     ["what did i have for lunch", "you had noodles", "i had noodles for lunch"],
+    ["what is ten plus five", "it is fifteen", "ten plus five is fifteen"],
+    ["what is two plus two", "it is four", "two plus two is four"],
     // everyday questions with several natural answers (Level 5, temperature)
     ["how are you", "i am fine thank you"],
     ["how are you", "i am fine thank you"],
@@ -228,7 +234,8 @@ window.BTL_CORPUS = {
     "where does my mother live",
     "where does my teacher work",
     "when is the library closed",
-    "what time does the bus to the city leave"
+    "what time does the bus to the city leave",
+    "what is seventeen plus five" // a sum: always used in Level 7 (numbers are just likely words too)
   ],
 
   // Level 4: questions offered as buttons (must be in "qa")
