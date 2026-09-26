@@ -25,6 +25,7 @@ All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` 
 - At the start, have everyone fill in "Who's playing?" on the front page (nickname, optional team, class code). Remind students to use a nickname, not their real name.
 - Tell them the first full run is the one that counts, so it's worth reading each stage's rules card before pressing Start. The timer doesn't run on the rules card.
 - A nickname is reserved as soon as a student signs in. A student who switches device or browser (or uses a private window) must pick a new nickname; stages already sent stay under the old one, and the CSV shows both.
+- A student who changes computer mid-arena uses the **resume code** shown on each stage screen (arena → Continue on another computer). In the learning games they type the last **level code** they saw; you can also give out the teacher code `OPEN-ALL-LEVELS`.
 - The board updates after every stage, so the ranking moves during play. That is part of the fun, but you can hide the projector until the end if it stresses the class.
 
 ## What each stage checks

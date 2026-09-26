@@ -52,6 +52,7 @@ No names, emails or student IDs are stored.
 - A team's score is the average of its members, so team size doesn't matter.
 - **Download results (CSV)** on the board gives one row per student per stage (plus the "joined" rows), for both arenas. The `counted` column marks first runs.
 - Reloading the page carries on with the same item, and its timer keeps running.
+- **Switching computers (arenas):** every stage screen shows a resume code (e.g. `K7Q2-XPMA`). On the other computer, the student opens the arena, chooses **Continue on another computer**, and types the same nickname, class code and that code. Finished stages keep their points (read back from the scoreboard, so they can't be inflated); a stage left half-way starts again with new questions.
 - **Speed:** the Sheet saves about one result per second. If a whole class finishes a stage at the same moment, some results take up to half a minute to appear, and any that time out are re-sent automatically. (Tested live with 30 results sent at once: all arrived.)
 - **No connection?** Stage results wait on the device and are sent automatically when the connection returns.
 - **Limitation:** scores are computed in the browser, so a determined student could fake one, or start again under a new nickname. Treat the board as motivation, not as assessment evidence.
@@ -59,6 +60,13 @@ No names, emails or student IDs are stored.
 `config.js` also has:
 - `BOARD_REFRESH_SECONDS`: raise it for very large classes. Google limits how often a script can be called; this game was not load-tested with a real class.
 - `TIME_FACTOR`: for example, 1.5 gives everyone 50% more time.
+
+## Carry-on codes and reset (learning games and whole site)
+
+- **Level codes:** finishing a level in Be the LLM or Be the Agent shows a code (e.g. `LLM3-9RQJ`). Typing it in the **Carrying on from another computer?** box on that game's level map marks that level and all earlier ones done. The list is in `shared/codes.js`.
+- **Teacher code:** `OPEN-ALL-LEVELS` unlocks every level of both learning games (change it in `shared/codes.js`). The link option `?teacher=1` does the same without a code.
+- These codes are public in the repository. That's fine because the learning games have no scores; the arenas use the per-run resume code checked by the scoreboard.
+- **Reset everything on this device** (front-page footer) clears all four games, the ticks and the saved nickname. It warns if arena results are still waiting to be sent. Each game also has its own reset link.
 
 ## Scoring (both arenas)
 
