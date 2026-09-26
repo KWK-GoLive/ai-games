@@ -1,0 +1,39 @@
+date,product,qty,unit_price,total
+2026-07-01,Gel pen,4,15,60
+2026-07-01,Pencil case,1,120,120
+2026-07-01,Notebook,5,35,175
+2026-07-02,Highlighter set,5,89,445
+2026-07-02,Notebook,5,35,175
+2026-07-03,Notebook,1,35,35
+2026-07-03,Sticky notes,4,25,100
+2026-07-04,Gel pen,1,15,15
+2026-07-04,Backpack,2,450,900
+2026-07-05,Backpack,,450,
+2026-07-05,Gel pen,6,15,90
+2026-07-06,Backpack,1,450,450
+2026-07-06,Backpack,2,450,900
+2026-07-06,Notebook,2,35,70
+2026-07-06,Notebook,5,35,175
+2026-07-07,Highlighter set,4,89,356
+2026-07-07,Gel pen,5,15,75
+2026-07-08,Backpack,2,450,900
+2026-07-08,Backpack,1,450,450
+2026-07-09,Backpack,1,450,450
+2026-07-09,Highlighter set,1,89,89
+2026-07-10,Pencil case,1,120,120
+2026-07-10,Backpack,1,450,450
+2026-07-10,Backpack,1,450,450
+2026-07-10,Sticky notes,6,25,150
+2026-07-11,Sticky notes,3,25,75
+2026-07-11,Sticky notes,5,25,125
+2026-07-11,Sticky notes,3,25,75
+2026-07-11,Highlighter set,2,89,178
+2026-07-12,Pencil case,1,120,120
+2026-07-12,Notebook,5,35,175
+2026-07-13,Backpack,2,450,900
+2026-07-13,Highlighter set,6,89,534
+2026-07-13,Sticky notes,3,25,75
+2026-07-14,Notebook,1,35,35
+2026-07-14,Backpack,2,450,900
+2026-07-14,Gel pen,3,15,45
+2026-07-14,Gel pen,4,15,60

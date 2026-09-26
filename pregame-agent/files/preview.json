@@ -1,0 +1,501 @@
+{
+ "xlsx": [
+  {
+   "name": "Raw Data",
+   "rows": [
+    [
+     "date",
+     "product",
+     "qty",
+     "unit_price",
+     "total"
+    ],
+    [
+     "2026-07-01",
+     "Gel pen",
+     4,
+     15,
+     60
+    ],
+    [
+     "2026-07-01",
+     "Pencil case",
+     1,
+     120,
+     120
+    ],
+    [
+     "2026-07-01",
+     "Notebook",
+     5,
+     35,
+     175
+    ],
+    [
+     "2026-07-02",
+     "Highlighter set",
+     5,
+     89,
+     445
+    ],
+    [
+     "2026-07-02",
+     "Notebook",
+     5,
+     35,
+     175
+    ],
+    [
+     "2026-07-03",
+     "Notebook",
+     1,
+     35,
+     35
+    ],
+    [
+     "2026-07-03",
+     "Sticky notes",
+     4,
+     25,
+     100
+    ],
+    [
+     "2026-07-04",
+     "Gel pen",
+     1,
+     15,
+     15
+    ],
+    [
+     "2026-07-04",
+     "Backpack",
+     2,
+     450,
+     900
+    ],
+    [
+     "2026-07-05",
+     "Backpack",
+     "",
+     450
+    ],
+    [
+     "2026-07-05",
+     "Gel pen",
+     6,
+     15,
+     90
+    ],
+    [
+     "2026-07-06",
+     "Backpack",
+     1,
+     450,
+     450
+    ],
+    [
+     "2026-07-06",
+     "Backpack",
+     2,
+     450,
+     900
+    ],
+    [
+     "2026-07-06",
+     "Notebook",
+     2,
+     35,
+     70
+    ],
+    [
+     "2026-07-06",
+     "Notebook",
+     5,
+     35,
+     175
+    ],
+    [
+     "2026-07-07",
+     "Highlighter set",
+     4,
+     89,
+     356
+    ],
+    [
+     "2026-07-07",
+     "Gel pen",
+     5,
+     15,
+     75
+    ],
+    [
+     "2026-07-08",
+     "Backpack",
+     2,
+     450,
+     900
+    ],
+    [
+     "2026-07-08",
+     "Backpack",
+     1,
+     450,
+     450
+    ],
+    [
+     "2026-07-09",
+     "Backpack",
+     1,
+     450,
+     450
+    ],
+    [
+     "2026-07-09",
+     "Highlighter set",
+     1,
+     89,
+     89
+    ],
+    [
+     "2026-07-10",
+     "Pencil case",
+     1,
+     120,
+     120
+    ],
+    [
+     "2026-07-10",
+     "Backpack",
+     1,
+     450,
+     450
+    ],
+    [
+     "2026-07-10",
+     "Backpack",
+     1,
+     450,
+     450
+    ],
+    [
+     "2026-07-10",
+     "Sticky notes",
+     6,
+     25,
+     150
+    ],
+    [
+     "2026-07-11",
+     "Sticky notes",
+     3,
+     25,
+     75
+    ],
+    [
+     "2026-07-11",
+     "Sticky notes",
+     5,
+     25,
+     125
+    ],
+    [
+     "2026-07-11",
+     "Sticky notes",
+     3,
+     25,
+     75
+    ],
+    [
+     "2026-07-11",
+     "Highlighter set",
+     2,
+     89,
+     178
+    ],
+    [
+     "2026-07-12",
+     "Pencil case",
+     1,
+     120,
+     120
+    ],
+    [
+     "2026-07-12",
+     "Notebook",
+     5,
+     35,
+     175
+    ],
+    [
+     "2026-07-13",
+     "Backpack",
+     2,
+     450,
+     900
+    ],
+    [
+     "2026-07-13",
+     "Highlighter set",
+     6,
+     89,
+     534
+    ],
+    [
+     "2026-07-13",
+     "Sticky notes",
+     3,
+     25,
+     75
+    ],
+    [
+     "2026-07-14",
+     "Notebook",
+     1,
+     35,
+     35
+    ],
+    [
+     "2026-07-14",
+     "Backpack",
+     2,
+     450,
+     900
+    ],
+    [
+     "2026-07-14",
+     "Gel pen",
+     3,
+     15,
+     45
+    ],
+    [
+     "2026-07-14",
+     "Gel pen",
+     4,
+     15,
+     60
+    ]
+   ]
+  },
+  {
+   "name": "Summary by Product",
+   "rows": [
+    [
+     "July 2026 Sales Summary by Product"
+    ],
+    [
+     "Prices in Thai Baht (THB)"
+    ],
+    [],
+    [
+     "Product",
+     "Units Sold",
+     "Total Revenue (THB)",
+     "Avg. Unit Price (THB)",
+     "No. of Orders",
+     "% of Total Revenue"
+    ],
+    [
+     "Backpack",
+     {
+      "f": "SUMIFS('Raw Data'!C2:C39,'Raw Data'!B2:B39,A5)",
+      "v": 15
+     },
+     {
+      "f": "SUMIFS('Raw Data'!E2:E39,'Raw Data'!B2:B39,A5)",
+      "v": 6750
+     },
+     {
+      "f": "IFERROR(C5/B5,0)",
+      "v": 450
+     },
+     {
+      "f": "COUNTIFS('Raw Data'!B2:B39,A5)",
+      "v": 11
+     },
+     {
+      "f": "IFERROR(C5/$C$11,0)",
+      "v": 0.643040868819663,
+      "pct": 0.643040868819663
+     }
+    ],
+    [
+     "Gel pen",
+     {
+      "f": "SUMIFS('Raw Data'!C2:C39,'Raw Data'!B2:B39,A6)",
+      "v": 23
+     },
+     {
+      "f": "SUMIFS('Raw Data'!E2:E39,'Raw Data'!B2:B39,A6)",
+      "v": 345
+     },
+     {
+      "f": "IFERROR(C6/B6,0)",
+      "v": 15
+     },
+     {
+      "f": "COUNTIFS('Raw Data'!B2:B39,A6)",
+      "v": 6
+     },
+     {
+      "f": "IFERROR(C6/$C$11,0)",
+      "v": 0.0328665332952272,
+      "pct": 0.0328665332952272
+     }
+    ],
+    [
+     "Highlighter set",
+     {
+      "f": "SUMIFS('Raw Data'!C2:C39,'Raw Data'!B2:B39,A7)",
+      "v": 18
+     },
+     {
+      "f": "SUMIFS('Raw Data'!E2:E39,'Raw Data'!B2:B39,A7)",
+      "v": 1602
+     },
+     {
+      "f": "IFERROR(C7/B7,0)",
+      "v": 89
+     },
+     {
+      "f": "COUNTIFS('Raw Data'!B2:B39,A7)",
+      "v": 5
+     },
+     {
+      "f": "IFERROR(C7/$C$11,0)",
+      "v": 0.152615032866533,
+      "pct": 0.152615032866533
+     }
+    ],
+    [
+     "Notebook",
+     {
+      "f": "SUMIFS('Raw Data'!C2:C39,'Raw Data'!B2:B39,A8)",
+      "v": 24
+     },
+     {
+      "f": "SUMIFS('Raw Data'!E2:E39,'Raw Data'!B2:B39,A8)",
+      "v": 840
+     },
+     {
+      "f": "IFERROR(C8/B8,0)",
+      "v": 35
+     },
+     {
+      "f": "COUNTIFS('Raw Data'!B2:B39,A8)",
+      "v": 7
+     },
+     {
+      "f": "IFERROR(C8/$C$11,0)",
+      "v": 0.0800228636753358,
+      "pct": 0.0800228636753358
+     }
+    ],
+    [
+     "Pencil case",
+     {
+      "f": "SUMIFS('Raw Data'!C2:C39,'Raw Data'!B2:B39,A9)",
+      "v": 3
+     },
+     {
+      "f": "SUMIFS('Raw Data'!E2:E39,'Raw Data'!B2:B39,A9)",
+      "v": 360
+     },
+     {
+      "f": "IFERROR(C9/B9,0)",
+      "v": 120
+     },
+     {
+      "f": "COUNTIFS('Raw Data'!B2:B39,A9)",
+      "v": 3
+     },
+     {
+      "f": "IFERROR(C9/$C$11,0)",
+      "v": 0.0342955130037154,
+      "pct": 0.0342955130037154
+     }
+    ],
+    [
+     "Sticky notes",
+     {
+      "f": "SUMIFS('Raw Data'!C2:C39,'Raw Data'!B2:B39,A10)",
+      "v": 24
+     },
+     {
+      "f": "SUMIFS('Raw Data'!E2:E39,'Raw Data'!B2:B39,A10)",
+      "v": 600
+     },
+     {
+      "f": "IFERROR(C10/B10,0)",
+      "v": 25
+     },
+     {
+      "f": "COUNTIFS('Raw Data'!B2:B39,A10)",
+      "v": 6
+     },
+     {
+      "f": "IFERROR(C10/$C$11,0)",
+      "v": 0.0571591883395256,
+      "pct": 0.0571591883395256
+     }
+    ],
+    [
+     "TOTAL",
+     {
+      "f": "SUM(B5:B10)",
+      "v": 107
+     },
+     {
+      "f": "SUM(C5:C10)",
+      "v": 10497
+     },
+     {
+      "f": "IFERROR(C11/B11,0)",
+      "v": 98.1028037383178
+     },
+     {
+      "f": "SUM(E5:E10)",
+      "v": 38
+     },
+     {
+      "f": "IFERROR(C11/$C$11,0)",
+      "v": 1,
+      "pct": 1
+     }
+    ],
+    [],
+    [
+     "Note: One Backpack order on 2026-07-05 has no recorded quantity/price and is excluded from totals (see highlighted row in Raw Data tab)."
+    ],
+    [],
+    [
+     "Top product by revenue:",
+     {
+      "f": "INDEX(A5:A10,MATCH(MAX(C5:C10),C5:C10,0))",
+      "v": "Backpack"
+     }
+    ]
+   ]
+  }
+ ],
+ "docx": [
+  {
+   "h1": "Sales Memo — July 2026"
+  },
+  {
+   "p": "To: Shop Owner"
+  },
+  {
+   "p": "Date: September 27, 2026"
+  },
+  {
+   "p": "Backpacks drove the month: just 15 units (11 orders) brought in ฿6,750 — about 64% of total revenue (฿10,497), even though gel pens and sticky notes each sold more units. Highlighter sets were the strong #2 (15% of revenue from just 5 orders), suggesting good margin-per-sale on both items."
+  },
+  {
+   "p": "Gel pens, notebooks, and sticky notes sold in high volume but contributed little revenue each — useful for footfall, not profit. One backpack sale (July 5) is missing its quantity and price and was excluded from totals; worth checking that record."
+  },
+  {
+   "p": "Bottom line: consider stocking more backpacks and highlighter sets, and bundling low-ticket items with them to lift basket size."
+  }
+ ]
+}
