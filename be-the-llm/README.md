@@ -11,7 +11,7 @@ Everything runs in the browser. The model is small enough to be fully see-throug
 | 3 | Build a sentence | Guess with the model's %, then write a sentence word by word | Whole answers are many guesses in a row |
 | 4 | Answer a question | See a plain model ramble; add 43 example chats; watch the same kind of model answer word by word | A chat is still "continue the text after A:" |
 | 5 | Same question, different answers | Temperature dial; ask one question 5 times at low and high settings | Why answers vary |
-| 6 | How much can it see? | Guess with only 1, then 2, then 3 words visible | The context window |
+| 6 | How much can it see? | Guess with only 1, then 2, then 3 words visible; then a back-off round | The context window, and what the counting model does with words it has never seen together |
 | 7 | Fact-check the chatbot | Mark answers Supported or Made up, then check the source | Hallucinations: sounding sure is not being right |
 
 Each level opens with a short "How it works" card and closes with a "What you just saw" recap that explains new terms in everyday words. A full playthrough takes about 25–30 minutes; this is an estimate, not yet timed with players. Change the number of rounds in `config.js`.
