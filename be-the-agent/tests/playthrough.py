@@ -17,7 +17,7 @@ def serve():
         def log_message(self, *a):
             pass
     socketserver.TCPServer.allow_reuse_address = True
-    httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=ROOT))
+    httpd = socketserver.TCPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=os.path.dirname(ROOT)))  # serve the whole site (the game uses ../shared/)
     global PORT
     PORT = httpd.server_address[1]
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
@@ -52,7 +52,7 @@ def play_all(page, tag, dl_dir):
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.on("dialog", lambda d: d.accept())
-    page.goto(f"http://127.0.0.1:{PORT}/index.html")
+    page.goto(f"http://127.0.0.1:{PORT}/be-the-agent/index.html")
     assert page.locator(".level-card").count() == 6
     assert page.locator(".level-card[disabled]").count() == 5
     shot(page, f"{tag}-00-home")
@@ -179,7 +179,7 @@ def play_all(page, tag, dl_dir):
     assert "agent" in (page.evaluate("localStorage.getItem('ai-games-done')") or ""), "master-page tick recorded"
     shot(page, f"{tag}-09-summary")
 
-    page.goto(f"http://127.0.0.1:{PORT}/index.html")
+    page.goto(f"http://127.0.0.1:{PORT}/be-the-agent/index.html")
     assert page.locator(".level-card[disabled]").count() == 0
     sw = page.evaluate("document.documentElement.scrollWidth")
     cw = page.evaluate("document.documentElement.clientWidth")
@@ -230,7 +230,7 @@ def main():
         page = ctx.new_page()
         errs = []
         page.on("pageerror", lambda e: errs.append(str(e)))
-        page.goto(f"http://127.0.0.1:{PORT}/index.html?mode=class&teacher=1")
+        page.goto(f"http://127.0.0.1:{PORT}/be-the-agent/index.html?mode=class&teacher=1")
         try:
             assert page.locator(".level-card[disabled]").count() == 0
             assert page.evaluate("getComputedStyle(document.documentElement).fontSize") == "18px"
@@ -259,7 +259,7 @@ def main():
         errs = []
         page.on("pageerror", lambda e: errs.append(str(e)))
         page.add_init_script("Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } });")
-        page.goto(f"http://127.0.0.1:{PORT}/index.html")
+        page.goto(f"http://127.0.0.1:{PORT}/be-the-agent/index.html")
         if page.locator(".level-card").count() != 6 or errs:
             failures.append(f"blocked storage: {errs}")
         else:
