@@ -92,10 +92,14 @@ def play_all(page, tag):
     assert page.locator('.stars').count() == 0, 'no stars on the result card'
     next_level(page, 3)
 
-    # L3
+    # L3 (v4: 5 rounds, one of them a tie round that explains the tie rule)
     start(page)
     shot(page, f"{tag}-05-L3-round")
+    ties_seen = []
+    page.on("console", lambda m: None)
+    page.evaluate("""() => { window.__ties = 0; new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.classList && n.classList.contains('tie-note')) window.__ties++; }))).observe(document.body, {subtree: true, childList: true}); }""")
     play_rounds(page)
+    assert page.evaluate("window.__ties") >= 1, "Level 3 shows the tie rule in at least one round"
     for _ in range(15):
         fin = page.get_by_role("button", name="Finish level")
         if fin.count():
@@ -188,6 +192,8 @@ def play_all(page, tag):
         srcs.nth(i).click()
     assert page.get_by_text("Found in the training text").count() >= 1
     assert page.get_by_text("No training text says this.").count() >= 1
+    assert page.get_by_text("It never did the sum.").count() == 1, "Level 7 always includes the 17 + 5 question"
+    assert "Seventeen plus five" in page.inner_text("main") or "seventeen plus five" in page.inner_text("main")
     shot(page, f"{tag}-12-L7")
     page.get_by_label("your own question").fill("where does my mother live")
     page.get_by_role("button", name="Ask", exact=True).click()

@@ -189,6 +189,20 @@ for (var v = 0; v < 30; v++) variety.add(chat.answer(M.tokenize(C.l5Questions[0]
 console.log("  '" + C.l5Questions[0] + "' at temperature 1.5 over 30 runs: " + variety.size + " different answers");
 check(variety.size >= 3, "Level 5 first question should vary at high temperature");
 
+section("Level 7 sum (v4)");
+var F = require(path.join(__dirname, "../js/facts.js"));
+var sumQ = C.unanswerable.filter(function (q) { return / plus /.test(q); });
+check(sumQ.length === 1, "exactly one sum question in 'unanswerable'");
+sumQ.forEach(function (q) {
+  var w = M.tokenize(q), r = chat.answer(w, 0);
+  var nums = { two: 2, four: 4, five: 5, ten: 10, fifteen: 15, seventeen: 17, twenty: 20, two2: 22 };
+  var said = r.answer.filter(function (x) { return x in nums; }).map(function (x) { return nums[x]; });
+  console.log("  " + q + " -> " + r.answer.join(" ") + " (backed off to: " + r.trail[0].seen.join(" ") + ")");
+  check(r.finished && said.length === 1 && said[0] !== 22, "the sum gets a wrong number (17 + 5 = 22)");
+  check(r.trail[0].seen.length < w.length + 2, "the sum answer comes from back-off (not the whole question)");
+  check(!F.backingExample(C, w, r.answer), "the sum answer is NOT backed by any example (Level 7 marks it made up)");
+});
+
 section("Sources lookup");
 var pcs = model.sources(M.tokenize("the train to chiang mai leaves at nine"));
 console.log("  " + pcs.map(function (p) { return "[" + p.words.join(" ") + "] <- #" + p.source; }).join(" + "));
