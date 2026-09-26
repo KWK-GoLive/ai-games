@@ -72,13 +72,14 @@ window.AGA_DATA = {
     { id: "h9", title: "Groups", text: "Groups of 6 or more people get 10 percent off. Book group rentals at least two days ahead." },
     { id: "h10", title: "Lost property", text: "Items left in baskets go to the lost property box at the River branch and are kept for 30 days." }
   ],
+  /* cards = the word cards a player can tap (no typing). Some pull up the right piece, some are traps; tests check both. */
   searchQuestions: [
-    { q: "A customer's e-bike ran out of power halfway. Can she get her money back?", target: "h8" },
-    { q: "Do the kids need to wear anything on their heads?", target: "h4" },
-    { q: "Twelve friends want to ride together next week. Any deal for them?", target: "h9" },
-    { q: "A customer brings a bike back at 9 pm. Do we charge extra?", target: "h5" },
-    { q: "A bike came back with a bent wheel. What do I do?", target: "h6" },
-    { q: "How much must a customer pay up front before taking a bike?", target: "h3" }
+    { q: "A customer's e-bike ran out of power halfway. Can she get her money back?", target: "h8", cards: ["e-bike", "power", "money", "back", "battery", "refund", "halfway", "customer", "breaks", "approve"] },
+    { q: "Do the kids need to wear anything on their heads?", target: "h4", cards: ["kids", "wear", "heads", "helmet", "hat", "safety", "bike", "rental", "free", "children"] },
+    { q: "Twelve friends want to ride together next week. Any deal for them?", target: "h9", cards: ["twelve", "friends", "ride", "free", "deal", "group", "discount", "people", "price", "percent"] },
+    { q: "A customer brings a bike back at 9 pm. Do we charge extra?", target: "h5", cards: ["pm", "charge", "extra", "late", "fee", "evening", "back", "bike", "customer", "night"] },
+    { q: "A bike came back with a bent wheel. What do I do?", target: "h6", cards: ["bent", "wheel", "bike", "back", "damage", "photos", "form", "broken", "repair", "manager"] },
+    { q: "How much must a customer pay up front before taking a bike?", target: "h3", cards: ["pay", "front", "before", "customer", "taking", "deposit", "card", "money", "bike", "cash"] }
   ],
 
   /* Stage 3: which tool? */
