@@ -108,7 +108,13 @@
     return apiGet({ action: "post", payload: JSON.stringify(obj), t: Date.now() }, 35000); // a busy class can queue for a while
   }
 
+  /* The player's nickname, team and class code, typed once on the front page and shared by both arenas. */
+  var PROFILE_KEY = "aig-player";
+  function getProfile() { var p = load(PROFILE_KEY) || {}; return { nickname: cleanNick(p.nickname), team: cleanTeam(p.team), classCode: cleanClass(p.classCode) }; }
+  function setProfile(p) { save(PROFILE_KEY, { nickname: p.nickname || "", team: p.team || "", classCode: p.classCode || "" }); }
+
   var ARENA = window.ARENA = {
+    getProfile: getProfile, setProfile: setProfile,
     h: h, clear: clear, makeRng: makeRng, shuffle: shuffle, pick: pick, score: score,
     cleanNick: cleanNick, cleanClass: cleanClass, cleanTeam: cleanTeam, hash: hash,
     boardEnabled: !!URL_, apiGet: apiGet
@@ -240,9 +246,11 @@
     }
 
     function playerForm() {
-      var nick = h("input", { class: "text-input", id: "nick", maxlength: "16", autocomplete: "off", value: st.player.nickname || "" });
-      var team = h("input", { class: "text-input", id: "team", maxlength: "20", autocomplete: "off", value: st.player.team || "" });
-      var code = h("input", { class: "text-input", id: "classCode", maxlength: "20", autocomplete: "off", value: st.player.classCode || "" });
+      var prof = getProfile();
+      var pre = { nickname: prof.nickname || st.player.nickname || "", team: prof.nickname ? prof.team : (st.player.team || ""), classCode: prof.classCode || st.player.classCode || "" };
+      var nick = h("input", { class: "text-input", id: "nick", maxlength: "16", autocomplete: "off", value: pre.nickname });
+      var team = h("input", { class: "text-input", id: "team", maxlength: "20", autocomplete: "off", value: pre.team });
+      var code = h("input", { class: "text-input", id: "classCode", maxlength: "20", autocomplete: "off", value: pre.classCode });
       var msg = h("p", { class: "feedback", "aria-live": "polite" });
       var btn = h("button", { class: "btn primary", type: "submit", text: "Start my run →" });
       var form = h("form", { class: "card stack", novalidate: true },
@@ -254,6 +262,28 @@
           : h("p", { class: "muted small", text: "The class scoreboard isn't connected, so your score stays on this device." }),
         msg,
         h("div", { class: "row end" }, btn));
+      // Signed in on the front page already? Show a short "Playing as …" card; "Change" opens the full form.
+      var ready = pre.nickname && (!URL_ || pre.classCode);
+      var wrap = h("div");
+      if (ready) {
+        var go1 = h("button", { class: "btn primary", type: "button", text: "Start my run \u2192" });
+        var chg = h("button", { class: "btn ghost", type: "button", text: "Change" });
+        var summary = h("section", { class: "card stack" },
+          h("div", { class: "kicker", text: "Signed in" }),
+          h("h2", {}, "Playing as ", h("b", { text: pre.nickname })),
+          h("p", { class: "muted", text: [pre.team ? "Team " + pre.team : "No team", URL_ ? "class " + pre.classCode : "scores stay on this device"].join(" \u00b7 ") }),
+          h("div", { class: "row end" }, chg, go1));
+        form.classList.add("hidden");
+        chg.addEventListener("click", function () { summary.remove(); form.classList.remove("hidden"); nick.focus(); });
+        go1.addEventListener("click", function () {
+          if (go1.disabled) return;
+          go1.disabled = true;
+          form.classList.remove("hidden"); summary.classList.add("hidden"); // any message (e.g. nickname taken) shows in the form
+          form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event("submit", { cancelable: true }));
+        });
+        wrap.appendChild(summary);
+      }
+      wrap.appendChild(form);
       form.addEventListener("submit", function (e) {
         e.preventDefault();
         if (btn.disabled) return;
@@ -261,6 +291,7 @@
         if (!n) { msg.className = "feedback bad"; msg.textContent = "Please type a nickname (letters or numbers)."; nick.focus(); return; }
         if (URL_ && !cc) { msg.className = "feedback bad"; msg.textContent = "Please type the class code your teacher gave you."; code.focus(); return; }
         st.player = { nickname: n, team: tm, classCode: cc };
+        setProfile({ nickname: n, team: tm, classCode: cc || getProfile().classCode });
         var run = newRun("official");
         function begin() { st.official = run; persist(); go(run); }
         if (!URL_) return begin();
@@ -276,7 +307,7 @@
           else throw new Error("busy");
         }).catch(function () { st.queue.push(join); begin(); /* can't reach the scoreboard: play now, send later */ });
       });
-      return form;
+      return wrap;
     }
 
     /* ---------- run flow ---------- */
