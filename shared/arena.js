@@ -98,14 +98,14 @@
       p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); });
     });
   }
-  function apiGet(params) {
+  function apiGet(params, ms) {
     var q = Object.keys(params).map(function (k) { return encodeURIComponent(k) + "=" + encodeURIComponent(params[k]); }).join("&");
-    return withTimeout(fetch(URL_ + (URL_.indexOf("?") >= 0 ? "&" : "?") + q, { cache: "no-store" }).then(function (r) { return r.json(); }), 10000);
+    return withTimeout(fetch(URL_ + (URL_.indexOf("?") >= 0 ? "&" : "?") + q, { cache: "no-store" }).then(function (r) { return r.json(); }), ms || 10000);
   }
   function apiPost(obj) {
     // Sent as a GET: a browser POST to Apps Script gets redirected and the reply can be lost (seen in Chrome),
     // while GET replies arrive reliably. The server treats action=post exactly like a POST. Payloads are small.
-    return withTimeout(apiGet({ action: "post", payload: JSON.stringify(obj), t: Date.now() }), 15000);
+    return apiGet({ action: "post", payload: JSON.stringify(obj), t: Date.now() }, 35000); // a busy class can queue for a while
   }
 
   var ARENA = window.ARENA = {
@@ -162,7 +162,7 @@
         if (st.queue.length && sentOk) setTimeout(flush, 300);
       });
     }
-    setInterval(flush, 15000);
+    setInterval(flush, 12000 + Math.floor(Math.random() * 8000)); // spread retries so a class doesn't retry in step
     window.addEventListener("online", flush);
 
     /* ---------- runs ---------- */
