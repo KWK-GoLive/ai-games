@@ -200,6 +200,8 @@ def main():
             assert "4 different names" in pg.locator("main").inner_text()
             pg.click("text=Round 3 →"); pg.locator(".choice").nth(1).click()
             assert pg.locator(".pg-reply").count() == 5
+            pg.click("text=One more test →"); pg.locator(".choice").nth(1).click()
+            assert pg.locator(".pg-reply").count() == 5 and "gave no reference and no DOI" in pg.locator("main").inner_text()
             pg.click("text=Last step →")
             assert pg.locator("text=Play Be the LLM →").count() == 1
             assert pg.evaluate("document.documentElement.scrollWidth") <= vp["width"]
@@ -230,6 +232,16 @@ def main():
             pg.goto(BASE + "/index.html")
             assert pg.locator(".game[data-id=pre-llm] .done").count() == 1 and pg.locator(".game[data-id=pre-agent] .done").count() == 1
             pg.context.close()
+        # checklist page: six checks, printable, linked from the front page
+        pg = new_page(br, viewport={"width": 390, "height": 844})
+        pg.goto(BASE + "/index.html")
+        assert pg.locator('a[href="checklist.html"]').count() == 1
+        pg.goto(BASE + "/checklist.html")
+        assert pg.locator(".check-list li").count() == 6 and pg.get_by_role("button", name=re.compile("Print")).count() == 1
+        pg.emulate_media(media="print")
+        assert not pg.locator(".topbar").is_visible(), "print view hides the top bar"
+        assert pg.evaluate("document.documentElement.scrollWidth") <= 390
+        pg.context.close()
         results.append("pre-games: both played by tapping at phone and iPad width; real files view + download byte-identical; ticks on the front page")
 
         # front-page sign-in is picked up by the arena ("Playing as ..."), and "Change" still works
@@ -356,6 +368,10 @@ def main():
         first = pg.locator("table.board tbody tr").first.inner_text()
         assert order[0] in first, first
         assert pg.get_by_text("Teams").count() >= 1
+        # v4: "% right" = fully right / items, from the scoreboard data
+        bd = mock_get(action="board", game="llm", classCode="SEC-1")["players"]
+        accs = pg.locator("table.board tbody tr td.acc").all_inner_texts()
+        assert accs == [f"{round(100 * p['correct'] / p['items'])}%" if p["items"] else "–" for p in bd], (accs, bd[:2])
         shot(pg, "site-02-board")
         pg.get_by_role("tab", name="Agent Arena").click()
         pg.get_by_text("Agent Arena · SEC-1 · 2 players").wait_for()

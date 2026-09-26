@@ -33,6 +33,17 @@ L.same.names.forEach(function (n, i) { check(L.same.replies[i].indexOf(n) >= 0, 
 check(new Set(L.same.names).size === 4, "4 different names");
 L.sentences.forEach(function (s) { check(s.prompt.indexOf(s.start) >= 0, "sentence start matches the prompt: " + s.start); });
 
+/* ---- references round (v4) ---- */
+var rr = JSON.parse(fs.readFileSync(path.join(R, "pregames/data/raw/llm-runs-references.json"), "utf8")).runs;
+check(rr.length === 5 && L.refs.replies.length === 5, "references: 5 runs");
+rr.forEach(function (r, i) {
+  check(L.refs.replies[i] === r.reply, "references run " + (i + 1) + ": reply identical to the raw record");
+  check(r.prompt === L.wrapper + "\n\nUser's message:\n" + L.refs.prompt, "references run " + (i + 1) + ": prompt as stated");
+  check(!/10\.\d{4,}\//.test(r.reply) && !/doi\.org/i.test(r.reply), "references run " + (i + 1) + ": no DOI given (the game says so)");
+  check(/scholar|thaijo|sciencedirect|scopus|researchgate|thailis/i.test(r.reply), "references run " + (i + 1) + ": pointed to places to search (the game says so)");
+  check(r.model === L.model && r.tools.join() === "SubagentHandback", "references run " + (i + 1) + ": model, no tools");
+});
+
 /* ---- agent replay ---- */
 var ar = JSON.parse(fs.readFileSync(path.join(R, "pregames/data/raw/agent-run.json"), "utf8"));
 function rawText(i) { var s = ar.steps[i]; return s.kind === "tool_use" ? (s.input.command || s.input.skill || s.input.file_path || JSON.stringify(s.input)) : String(s.text); }
