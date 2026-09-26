@@ -7,14 +7,14 @@ Everything runs in the browser. The model is small enough to be fully see-throug
 | Level | Name | What players do | The idea |
 |---|---|---|---|
 | 1 | Guess the next word | Guess from 4 choices; You vs Model | A chatbot's only job is to guess the next word |
-| 2 | Train the model | Count word pairs by hand, then train on all 137 sentences | Training = learning from lots of example text |
+| 2 | Train the model | Count word pairs by hand, then train on all 140 sentences | Training = learning from lots of example text |
 | 3 | Build a sentence | Guess with the model's %, then write a sentence word by word | Whole answers are many guesses in a row |
-| 4 | Answer a question | See a plain model ramble; add 43 example chats; watch the same kind of model answer word by word | A chat is still "continue the text after A:" |
+| 4 | Answer a question | See a plain model ramble; add 45 example chats; watch the same kind of model answer word by word | A chat is still "continue the text after A:" |
 | 5 | Same question, different answers | Temperature dial; ask one question 5 times at low and high settings | Why answers vary |
 | 6 | How much can it see? | Guess with only 1, then 2, then 3 words visible; then a back-off round | The context window, and what the counting model does with words it has never seen together |
 | 7 | Fact-check the chatbot | Mark answers Supported or Made up, then check the source | Hallucinations: sounding sure is not being right |
 
-Each level opens with a short "How it works" card and closes with a "What you just saw" recap that explains new terms in everyday words. A full playthrough takes about 25–30 minutes; this is an estimate, not yet timed with players. Change the number of rounds in `config.js`.
+Each level opens with a short "How it works" card and closes with a "What you just saw" recap that explains new terms in everyday words. A full playthrough takes about 40–50 minutes for novice, non-native readers; this is an estimate, not yet timed with players. Change the number of rounds in `config.js`.
 
 ## Part of the AI games site
 
@@ -63,8 +63,8 @@ python3 tests/playthrough.py     # needs: pip install playwright && playwright i
 
 `js/model.js` is a word n-gram model: for the last few words, it counts which word came next in its training text; probability = count ÷ total. If it has never seen the last *k* words, it falls back to fewer words ("backoff").
 
-- **Plain model** (Levels 1–3, 6, and "before" in Level 4): ordinary sentences, up to 3 words of memory.
-- **Chat model** (Levels 4, 5, 7): the same sentences plus the example chats, each stored as `Q: question A: answer`, with up to 8 words of memory so it can keep track of the question. Answering a question = generating the words that follow `A:`.
+- **Plain model** (Levels 1–3, 6, and "before" in Level 4): ordinary sentences, with a window of up to 3 words.
+- **Chat model** (Levels 4, 5, 7): the same sentences plus the example chats, each stored as `Q: question A: answer`, with a window of up to 8 words so it can keep track of the question. Answering a question = generating the words that follow `A:`.
 - **Temperature** reshapes the probabilities as p ∝ count^(1/T) (softmax with temperature on log-probabilities); T = 0 always takes the top word.
 - **Made-up answers (Level 7)** happen naturally: for a question it has never seen, the model backs off to the ending it recognises (e.g. "… open A:") and continues with the answer to a similar question. Nothing is hard-coded.
 

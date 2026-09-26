@@ -3,5 +3,5 @@
  */
 window.BTL_CONFIG = {
   // Rounds per level. Fewer rounds = shorter playthrough.
-  ROUNDS: { L1: 8, L3: 8, L6: 5, L7: 6 }
+  ROUNDS: { L1: 5, L3: 5, L6: 4, L7: 6 }
 };

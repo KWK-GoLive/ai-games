@@ -15,9 +15,9 @@ For anyone introducing chatbots and large language models to learners with no te
 
 | Option | How | Time |
 |---|---|---|
-| **Whole class, projected** | `?mode=class&teacher=1`. Play Levels 1, 4 and 7 together with hand votes; players do the rest alone | 30–40 min including discussion |
-| **Solo, then discuss** | Everyone plays all 7 levels, then a 10-minute debrief using the prompts below | 35–40 min |
-| **Homework** | Full playthrough before a class on AI tools | 25–30 min |
+| **Whole class, projected** | `?mode=class&teacher=1`. Play Levels 1, 4 and 7 together with hand votes; players do the rest alone | 45–60 min including discussion (or two sittings) |
+| **Solo, then discuss** | Everyone plays all 7 levels, then a 10-minute debrief using the prompts below | 50–60 min (or two sittings: Levels 1–4, then 5–7) |
+| **Homework** | Full playthrough before a class on AI tools | 40–50 min (can be split: Levels 1–4, then 5–7) |
 
 ## Suggested moves
 
@@ -48,5 +48,5 @@ For anyone introducing chatbots and large language models to learners with no te
 - Level 6 always includes one round ("can we meet at the ___") where the 3-word view was never seen in training, so the counting model has no data at all.
 - Level 7 answers are generated, not scripted: every made-up answer comes from the model backing off to a question ending it recognises. Players can open the list of facts in the training text to check; a reworded question counts as Supported only if it is about exactly the same thing (same person or place, same verb).
 - The simplification to mention if asked: real chatbots are trained first on huge amounts of text, then on many example conversations, and are tuned further with feedback from people. The game shows only the "example conversations" idea.
-- All text is synthetic everyday English (137 sentences, 43 example chats). Edit `data/corpus.js` and run `node tests/check-corpus.js` to check changes.
+- All text is synthetic everyday English (140 sentences, 45 example chats). Edit `data/corpus.js` and run `node tests/check-corpus.js` to check changes.
 - Timing is an estimate. Adjust `ROUNDS` in `config.js`.
