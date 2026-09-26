@@ -18,10 +18,12 @@
       title: "More to look at, better guesses",
       text: [
         "With one word visible, many next words are possible. Each extra word you (and the model) could see narrowed it down. That is why the chat model in Level 4 needed a window of 8 words: with only 3, it would lose track of which question was asked.",
-        "Our counting model has a weakness you saw in the “never seen” round: it only works with word strings it has seen exactly, so a longer window can leave it with no data at all. Real chatbots don't need exact matches; they learn patterns, so a longer window helps them.",
+        "Our counting model has a weakness you saw in the “never seen” round: it only works with word strings it has seen exactly, so a longer window can leave it with no data at all. In the back-off round you saw its fix: drop the oldest word and look again, until something matches. The chat model in Levels 4, 5 and 7 does exactly this with its 8-word window.",
+        "Real chatbots don't need exact matches and don't back off like this: they learn patterns, so they can use the whole window even for sentences they have never seen.",
         "Real chatbots have a very large window: often whole documents plus your conversation so far. That's how they can refer back to something you said earlier. In a very long conversation, though, the earliest parts can still fall out of the window, so repeat key facts near your question."
       ],
-      words: [["Context window", "How much text the model can see at once when it guesses the next word."]]
+      words: [["Context window", "How much text the model can see at once when it guesses the next word."],
+        ["Back-off", "Our counting model's trick for words it has never seen together: drop the oldest word and look again, until the words match its training text."]]
     },
     run: function (container, done) {
       var ui = BTL.ui, h = ui.h, M = BTL.Model;
@@ -158,7 +160,7 @@
               ? "The model first got it with " + (firstModel + 1) + " word" + (firstModel ? "s" : "") + " visible."
               : "The model never got it with 3 words or fewer.") +
             (it.unseen ? " With 3 words it had no data at all, even though it was right with fewer words." : "");
-          moreBtn.textContent = i + 1 < items.length ? "Next round" : "Finish level";
+          moreBtn.textContent = i + 1 < items.length ? "Next round" : "Last round: back-off \u2192";
           moreBtn.classList.remove("hidden");
           moreBtn.disabled = false;
           moreBtn.focus();
@@ -169,7 +171,9 @@
             if (i < items.length) render();
             else {
               var frac = youTotal / maxPts;
-              done({ stars: frac >= 0.6 ? 3 : frac >= 0.35 ? 2 : 1, points: points, summary: "You guessed right " + youTotal + " of " + maxPts + " times across all windows." });
+              backoffRound(function (right) {
+                done({ stars: frac >= 0.6 ? 3 : frac >= 0.35 ? 2 : 1, points: points, summary: "You guessed right " + youTotal + " of " + maxPts + " times across all windows, and " + right + " of 2 back-off questions." });
+              });
             }
           };
         }
@@ -182,6 +186,65 @@
         };
         showStage();
       }
+      /*
+       * Back-off round: what the model does when it has never seen the words in its window.
+       * Everything shown is computed by the model: it tries 3 words, then 2, then 1, and uses the first that has data.
+       */
+      function trailEl(prefix) {
+        var list = h("div", { class: "stage-list" });
+        for (var kk = 3; kk >= 1; kk--) {
+          var ctx = prefix.slice(-kk), d = model.next(prefix, kk);
+          var q = "\u201c" + ctx.map(M.displayWord).join(" ") + "\u201d";
+          var st = h("div", { class: "stage" }, h("h4", { text: (d.length ? "\u2713 " : "\u2717 ") + kk + " word" + (kk > 1 ? "s" : "") + ": " + q }));
+          if (!d.length) { st.appendChild(h("p", { class: "small", style: "margin:0", text: "Never seen in the training text. Drop the oldest word and look again." })); list.appendChild(st); continue; }
+          st.appendChild(ui.barsEl(d, { top: 3 }));
+          var tie = d.length > 1 && d[0].count === d[1].count;
+          st.appendChild(h("p", { class: "small", style: "margin:4px 0 0" }, "Seen! It writes ", h("b", { text: "\u201c" + M.displayWord(d[0].word) + "\u201d" }),
+            tie ? " (a tie: reading the training text from the top, \u201c" + M.displayWord(d[0].word) + "\u201d came right after " + q + " first)." : "."));
+          list.appendChild(st);
+          break;
+        }
+        return list;
+      }
+      function usedK(prefix) { for (var kk = 3; kk >= 1; kk--) if (model.next(prefix, kk).length) return kk; return 0; }
+
+      function backoffRound(finish) {
+        ui.clear(card);
+        var right = 0;
+        var ex1 = M.tokenize("can we meet at the"), ex2 = M.tokenize("i miss my");
+        card.appendChild(h("div", { class: "kicker", text: "Last round: back-off" }));
+        card.appendChild(h("p", { text: "In the rounds above, a window with no data meant the model was stuck. Counting models are usually given one extra trick for this. Can you guess it?" }));
+        card.appendChild(sentenceView({ prefix: ex1, answer: "" }, 3, false));
+        var q1 = {
+          q: "This model has a 3-word window and has never seen \u201cmeet at the\u201d. What does it do?",
+          options: ["It stops and writes nothing", "It drops the oldest word and looks up \u201cat the\u201d instead", "It picks any word at random", "It looks at the start of the sentence instead"],
+          answer: 1,
+          explain: "It backs off: drop the oldest word, look again, until the words match its training text."
+        };
+        var part2 = h("div", { class: "stack" });
+        card.appendChild(ui.mcq(q1, function (idx, ok) {
+          if (ok) right++;
+          card.appendChild(trailEl(ex1));
+          card.appendChild(part2);
+          part2.appendChild(h("p", { text: "Now you try. Same model, 3-word window:" }));
+          part2.appendChild(sentenceView({ prefix: ex2, answer: "" }, 3, false));
+          var k2 = usedK(ex2);
+          var opts = [3, 2, 1].map(function (kk) { return kk + " word" + (kk > 1 ? "s" : "") + ": \u201c" + ex2.slice(-kk).map(M.displayWord).join(" ") + "\u201d"; }).concat(["None: it has no data at all"]);
+          var q2 = { q: "Which window does the model end up using?", options: opts, answer: k2 ? 3 - k2 : 3,
+            explain: "Every word here is in the training text, but not these words together. It backs off all the way to the last word." };
+          part2.appendChild(ui.mcq(q2, function (idx2, ok2) {
+            if (ok2) right++;
+            part2.appendChild(trailEl(ex2));
+            part2.appendChild(h("p", { class: "muted", text: "Backing off keeps the model writing, but with less to go on: from \u201cmy\u201d alone, sister, brother and teeth are all equally likely. The chat model in Levels 4, 5 and 7 backs off the same way, from 8 words down." }));
+            var fin = h("button", { class: "btn primary", type: "button", text: "Finish level" });
+            fin.addEventListener("click", function () { if (fin.disabled) return; fin.disabled = true; finish(right); });
+            part2.appendChild(h("div", { class: "row end" }, fin));
+            fin.focus();
+          }));
+        }));
+        card.scrollIntoView({ block: "start" });
+      }
+
       render();
     }
   });
