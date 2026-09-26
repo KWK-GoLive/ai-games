@@ -31,7 +31,8 @@ window.AGA_DATA = {
     "2026-06-08,Park,ebike,2,12,24"
   ].join("\n"),
 
-  /* Stage 1: desk packing. The system prompt is always on the desk. "need" marks what the questions require. */
+  /* Stage 1: desk packing. The system prompt is always on the desk. "need" marks what the questions require;
+     "misleading" marks an outdated or contradicting card (costs more than a harmless extra). */
   system: "You are the Greenleaf Bikes assistant. Answer staff questions using only what is on the desk.",
   desks: [
     { id: "d1", capacity: 90, questions: ["What is the customer's name?", "Is the River branch open at 7.30 pm?"], cards: [
@@ -45,7 +46,7 @@ window.AGA_DATA = {
     { id: "d2", capacity: 100, questions: ["How much would 3 hours on an e-bike cost?", "What did the manager say about helmets?"], cards: [
       { id: "c1", kind: "Handbook", text: "Prices: city bikes cost 6 per hour, e-bikes 12 per hour and kids' bikes 4 per hour.", need: true, why: "gives the e-bike price per hour" },
       { id: "c2", kind: "Chat", text: "Manager (earlier today): From now on, every rider under 16 must wear a helmet, not just under 12.", need: true, why: "is what the manager said" },
-      { id: "c3", kind: "Handbook", text: "Helmets: helmets are free with every rental. Children under 12 must wear one.", need: false, why: "is the OLD rule; the manager changed it" },
+      { id: "c3", kind: "Handbook", text: "Helmets: helmets are free with every rental. Children under 12 must wear one.", need: false, misleading: true, why: "is the OLD rule; the manager changed it, so it could mislead the model" },
       { id: "c4", kind: "Tool result", text: "Table tool: 24 rentals in June, total 492.", need: false },
       { id: "c5", kind: "Handbook", text: "Deposits: every rental needs a deposit of 50, paid by card, returned when the bike comes back undamaged.", need: false },
       { id: "c6", kind: "File", text: "rentals.csv (all 24 rows): date, branch, bike, hours, price and total for every rental in June, one line each, from the first of June to the eighth.", need: false }
