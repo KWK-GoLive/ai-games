@@ -56,6 +56,14 @@ window.BTA_DATA = {
     }
   ],
 
+  // Level 2 (v4): now YOU choose the search words. Tap up to 3 word cards; the right piece must come out on top, on its own.
+  // Some cards pull up the wrong piece (traps). tests/check-data.js checks which cards win.
+  searchPractice: {
+    q: "A customer asks: do the brownies have nuts in them?",
+    target: "h6",
+    cards: ["brownies", "nuts", "customer", "drinks", "coffee", "free", "milk", "card", "shift", "cake"]
+  },
+
   // Level 5: customer emails (one hides an instruction for the AI).
   emails: [
     { from: "Nok", text: "The new pumpkin latte is lovely, but I waited 15 minutes on Saturday morning." },
