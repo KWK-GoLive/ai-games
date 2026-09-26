@@ -9,7 +9,7 @@ Everything runs in the browser with no libraries; it needs no internet once load
 | 1 | The desk | the app | Context window and tokens: the desk fills up, old messages fall off, a new chat starts empty, and "memory" is saved notes pasted back in |
 | 2 | Reading your files | the app | A file becomes text on the desk; if it's too big, search picks pieces. The wrong piece gives a confident wrong answer |
 | 3 | Tools | the model, then the app | The model writes a tool request; the app (harness) runs the calculator, table tool or search and pastes the result back. Knowledge cutoff |
-| 4 | The agent loop | model, app and human | Plan → act → check → fix, on the job "Excel summary + Word memo from sales.csv". The files are **real downloads** |
+| 4 | The agent loop | model, app and human | Plan → act → check → fix, on the job "Excel summary + Word memo from sales.csv". The files are **real**: view them on screen (sheet tabs, memo page) or download them |
 | 5 | Files that give orders | the human | Prompt injection: find instructions hidden in an email and a web page |
 | 6 | You're the boss | the human | Approve or deny 8 agent requests; permissions and privacy |
 

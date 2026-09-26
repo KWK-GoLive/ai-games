@@ -17,7 +17,7 @@ For anyone teaching beginners how AI assistants really work. It follows **Be the
 |---|---|---|
 | **Projected, together** | `?mode=class&teacher=1`. Do Levels 1, 4 and 5 together; players do 2, 3 and 6 alone | 35–45 min with discussion |
 | **Solo, then discuss** | Everyone plays all 6, then a debrief with the prompts below | 35–40 min |
-| **Homework** | Full playthrough; open the downloaded files | 25–30 min |
+| **Homework** | Full playthrough; open the files (view on screen or download) | 25–30 min |
 
 ## Suggested moves
 
@@ -27,7 +27,7 @@ For anyone teaching beginners how AI assistants really work. It follows **Be the
 
 **3. Level 3: point at the tool request.** The black box is the key image of the game: the model writes text, and the app does the work. Ask: "Who multiplied 1,284 by 37?"
 
-**4. Level 4: open the files in class.** Have everyone download `sales_summary.xlsx` and `memo.docx` and check the memo total against the Excel file. Then discuss the wrong number in the draft: nothing crashed, it just looked right.
+**4. Level 4: open the files in class.** Have everyone open `sales_summary.xlsx` and `memo.docx` (👁 View here works on phones and iPads; ⬇ Download gives the real files) and check the memo total against the Excel file. Then discuss the wrong number in the draft: nothing crashed, it just looked right.
 
 **5. Level 5: show the two answers side by side.** "Every customer is delighted" vs the real list of complaints. Both are fluent and confident.
 
