@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light only">
   <title>AI games: how chatbots and AI agents work</title>
-  <meta name="description" content="Four browser games for beginners: play the language model, then the AI agent, and test yourself in two class arenas.">
+  <meta name="description" content="Six browser games for beginners: warm up with real AI, play the language model and the AI agent, and test yourself in two class arenas.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5fbf'/%3E%3Crect x='6' y='20' width='4' height='6' rx='1' fill='white'/%3E%3Crect x='12' y='14' width='4' height='12' rx='1' fill='white'/%3E%3Crect x='18' y='9' width='4' height='17' rx='1' fill='white'/%3E%3Crect x='24' y='17' width='4' height='9' rx='1' fill='white'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="shared/arena.css">
+  <link rel="stylesheet" href="shared/visual.css">
+  <style>.part-h { font-size: 1.05rem; margin: 20px 0 8px; } .game.warm .tag { color: var(--good); }</style>
 </head>
 <body>
   <header class="topbar">
@@ -18,9 +20,14 @@
 
   <main>
     <section class="card stack">
-      <div class="kicker">Four games · no background needed</div>
+      <div class="kicker">Six short games · no background needed</div>
       <h1>How do chatbots and AI agents really work?</h1>
-      <p>Play them in order. In each learning game you do the AI's job yourself. Each arena then tests you against the clock, and your class can compete on a live scoreboard.</p>
+      <div class="v-cards cols-3">
+        <div class="v-card"><div class="v-card-icon" aria-hidden="true">👀</div><div class="v-card-title">Warm-up</div><p>Watch real AI at work and guess what it does. No score.</p></div>
+        <div class="v-card"><div class="v-card-icon" aria-hidden="true">🎮</div><div class="v-card-title">Learn</div><p>Do the AI's job yourself, one level at a time.</p></div>
+        <div class="v-card"><div class="v-card-icon" aria-hidden="true">🏆</div><div class="v-card-title">Challenge</div><p>Test yourself against the clock on a live class scoreboard.</p></div>
+      </div>
+      <p class="muted small">Play them in order: part 1 is about chatbots, part 2 about AI agents.</p>
     </section>
 
     <section class="card stack" id="signin" aria-labelledby="signin-h">
@@ -30,28 +37,44 @@
       <div id="signin-body"></div>
     </section>
 
-    <ol class="games" id="games">
-      <li><a class="game" href="be-the-llm/index.html" data-id="llm">
+    <div id="games">
+    <h2 class="part-h"><span aria-hidden="true">💬</span> Part 1 · Chatbots</h2>
+    <ol class="games">
+      <li><a class="game warm" href="pregame-llm/index.html" data-id="pre-llm">
         <span class="n" aria-hidden="true">1</span>
+        <span><span class="tag">Warm-up · 5 min · no score</span><br><span class="t">Guess the Chatbot</span><br>
+          <span class="d">Predict what a real chatbot wrote. Why is it never quite the same twice?</span></span>
+        <span class="right"></span></a></li>
+      <li><a class="game" href="be-the-llm/index.html" data-id="llm">
+        <span class="n" aria-hidden="true">2</span>
         <span><span class="tag">Learn · 25–30 min</span><br><span class="t">Be the LLM</span><br>
           <span class="d">Guess the next word, train a tiny model, and see how a chatbot answers questions, and why it can sound sure and still be wrong.</span></span>
         <span class="right"></span></a></li>
       <li><a class="game arena" href="llm-arena/index.html" data-id="llm-arena">
-        <span class="n" aria-hidden="true">2</span>
+        <span class="n" aria-hidden="true">3</span>
         <span><span class="tag">Challenge · about 20 min · scoreboard</span><br><span class="t">LLM Arena</span><br>
           <span class="d">Be the model against the clock: count, write, roll the temperature dice and answer chats exactly as the model would.</span></span>
         <span class="right"></span></a></li>
+    </ol>
+    <h2 class="part-h"><span aria-hidden="true">🤖</span> Part 2 · AI agents</h2>
+    <ol class="games" start="4">
+      <li><a class="game warm" href="pregame-agent/index.html" data-id="pre-agent">
+        <span class="n" aria-hidden="true">4</span>
+        <span><span class="tag">Warm-up · 6 min · no score</span><br><span class="t">Watch a Real Agent</span><br>
+          <span class="d">Replay a real AI agent turning a file into Excel and Word files, then check its work.</span></span>
+        <span class="right"></span></a></li>
       <li><a class="game" href="be-the-agent/index.html" data-id="agent">
-        <span class="n" aria-hidden="true">3</span>
+        <span class="n" aria-hidden="true">5</span>
         <span><span class="tag">Learn · 25–30 min</span><br><span class="t">Be the Agent</span><br>
           <span class="d">The desk (context window), reading files, tools, the agent loop, hidden instructions, and who's in charge.</span></span>
         <span class="right"></span></a></li>
       <li><a class="game arena" href="agent-arena/index.html" data-id="agent-arena">
-        <span class="n" aria-hidden="true">4</span>
+        <span class="n" aria-hidden="true">6</span>
         <span><span class="tag">Challenge · about 20 min · scoreboard</span><br><span class="t">Agent Arena</span><br>
-          <span class="d">Run the agent: pack the desk, search, pick tools, write table commands, catch planted orders and deliver a real Excel file.</span></span>
+          <span class="d">Run the agent: pack the desk, search, pick tools, ask the data questions, catch planted orders and deliver a real Excel file. No typing.</span></span>
         <span class="right"></span></a></li>
     </ol>
+    </div>
 
     <p class="muted small" style="margin-top:16px">Your progress is saved in this browser only. A tick appears when you finish a game on this device.</p>
   </main>
@@ -102,13 +125,13 @@
     if (p.nickname && (!A.boardEnabled || p.classCode)) summary(); else form();
   })();
 
-  /* Reset everything this site saved in this browser: all 4 games, the ticks and the sign-in. */
+  /* Reset everything this site saved in this browser: all 6 games, the ticks and the sign-in. */
   (function () {
     var KEYS = ["be-the-llm-v2", "be-the-agent-v1", "aig-arena-llm", "aig-arena-agent", "ai-games-done", "aig-player"];
     document.getElementById("resetAll").addEventListener("click", function () {
       var unsent = 0;
       try { ["aig-arena-llm", "aig-arena-agent"].forEach(function (k) { var s = JSON.parse(localStorage.getItem(k) || "null"); if (s && s.queue) unsent += s.queue.length; }); } catch (e) { /* storage blocked */ }
-      var msg = "Delete all progress for the four games on this device, and the saved nickname?" +
+      var msg = "Delete all progress for the six games on this device, and the saved nickname?" +
         (unsent ? "\n\nWarning: " + unsent + " arena result" + (unsent === 1 ? " has" : "s have") + " not reached the scoreboard yet and would be lost." : "") +
         "\n\nResults already on the class scoreboard stay there, and your nickname stays taken in that class.";
       if (window.confirm && !window.confirm(msg)) return;

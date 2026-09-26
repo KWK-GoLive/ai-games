@@ -1,17 +1,25 @@
-# Teaching guide: the four games
+# Teaching guide: the six games
 
-The site runs in this order: **Be the LLM → LLM Arena → Be the Agent → Agent Arena**. The learning games (1 and 3) have their own teaching guides in their folders. This guide covers the two arenas, which work as post-tests you can play as a class competition.
+The site runs in this order: **Guess the Chatbot → Be the LLM → LLM Arena → Watch a Real Agent → Be the Agent → Agent Arena**. The learning games (2 and 5) have their own teaching guides in their folders. This guide covers the two warm-ups and the two arenas, which work as post-tests you can play as a class competition.
 
 ## A suggested session plan
 
 | Session | Activity | Time |
 |---|---|---|
+| 1 | Guess the Chatbot (warm-up; good on the projector with a hand vote per guess) | 5–10 min |
 | 1 | Be the LLM (solo or projected), then debrief | 35–45 min |
 | 1 or 2 | LLM Arena as a class competition, board projected | about 20 min, plus 10 to discuss |
+| 2 or 3 | Watch a Real Agent (warm-up) | 6–10 min |
 | 2 or 3 | Be the Agent, then debrief | 35–45 min |
 | 2 or 3 | Agent Arena as a class competition | about 20 min, plus 10 to discuss |
 
 All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` in `config.js`.
+
+## The warm-ups
+
+- They are meant to raise questions, not answer them. Each ends with 3–4 "mysteries" and the level of the next game that answers each one. Collect the class's guesses before the learning game, and come back to them in the debrief.
+- **Honesty:** the chatbot replies and the agent run are real recordings (see README, "The two warm-ups"). They come from one model on one day; another chatbot, or the same one tomorrow, may answer differently. That is itself a good discussion point.
+- In the agent warm-up, the last round asks students to check four sentences from the agent's memo. Two are fine and two go beyond the data (a wrong detail about the missing row, and "margin", which the file can't show). Good debrief question: "The numbers were right. Why wasn't the memo?"
 
 ## Before class (5 minutes)
 
@@ -46,11 +54,11 @@ All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` 
 | Stage | The idea it tests |
 |---|---|
 | Desk packer | The context window is limited; choose the right, newest, smallest facts |
-| Search sniper | Reading files is often search + pieces; wrong piece means a confident wrong answer |
+| Search sniper | Reading files is often search + pieces; wrong piece means a confident wrong answer (players tap word cards; some are traps) |
 | Tool router | The model writes text; tools do exact work; risky actions need a human |
-| Data detective | Agents answer data questions by writing and running small programs |
+| Data detective | Agents answer data questions by writing and running small programs (players build the question by tapping and tap the answer in the result; no code to type) |
 | Injection hunter | Text inside documents can try to give the AI orders; people's instructions are just content |
-| Boss | Plan → permissions → run → check → deliver a real file |
+| Boss | Plan → permissions → run (three guided questions) → check → deliver a real file |
 
 ## Debrief questions
 
