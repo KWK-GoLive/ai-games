@@ -46,10 +46,13 @@
   function renderHome() {
     ui.clear(app); top(); updatePill();
     app.appendChild(h("section", { class: "card" },
-      h("div", { class: "kicker", text: "A game about chatbots" }),
+      h("div", { class: "kicker", text: "Game 2 \u00b7 A game about chatbots" }),
       h("h1", { text: "You are the language model." }),
-      h("p", { text: "Chatbots like ChatGPT, Claude and Gemini are built on a large language model (LLM). Under the hood, an LLM does one simple thing again and again: it looks at the text so far and guesses the next word." }),
-      h("p", { text: "In seven short levels you'll do that job yourself, build a tiny model of your own, and find out how “guess the next word” turns into a chatbot that answers your questions, and why it can sound sure and still be wrong." }),
+      window.VIS ? window.VIS.cards([
+        { icon: "🤖", title: "One simple job", text: "Chatbots like ChatGPT, Claude and Gemini are built on a large language model (LLM). Under the hood, an LLM does one simple thing again and again: it looks at the text so far and guesses the next word." },
+        { icon: "🎮", title: "7 short levels", text: "In seven short levels you'll do that job yourself, build a tiny model of your own, and find out how “guess the next word” turns into a chatbot that answers your questions, and why it can sound sure and still be wrong." }
+      ]) : null,
+      window.VIS ? window.VIS.diagram("nextword") : null,
       h("p", { class: "muted small", text: "No background needed. About 25–30 minutes. Levels unlock one after another." })));
 
     var grid = h("div", { class: "levels" });
@@ -110,17 +113,20 @@
   function introCard(def, onStart) {
     var card = h("section", { class: "card stack intro" },
       h("div", { class: "kicker", text: "How it works" }));
-    var steps = h("ol", { class: "steps" });
-    def.intro.forEach(function (c) {
-      steps.appendChild(h("li", { class: "step" },
-        h("div", { class: "step-text" },
-          c.title ? h("b", { text: c.title }) : null,
-          c.title ? " " : null,
-          c.text),
-        c.ex ? h("div", { class: "step-ex", text: c.ex, "aria-hidden": c.exSr ? "true" : null }) : null,
-        c.exSr ? h("span", { class: "sr-only", text: c.exSr }) : null));
-    });
-    card.appendChild(steps);
+    var vis = (def.vis || {});
+    var V = window.VIS;
+    if (V) {
+      if (vis.diagram) card.appendChild(V.diagram(vis.diagram));
+      card.appendChild(V.introSteps(def.intro, vis.icons));
+    } else {
+      var steps = h("ol", { class: "steps" });
+      def.intro.forEach(function (c) {
+        steps.appendChild(h("li", { class: "step" },
+          h("div", { class: "step-text" }, c.title ? h("b", { text: c.title }) : null, c.title ? " " : null, c.text),
+          c.ex ? h("div", { class: "step-ex", text: c.ex }) : null));
+      });
+      card.appendChild(steps);
+    }
     var go = h("button", { class: "btn primary", type: "button", text: "Got it, let's play" });
     go.addEventListener("click", function () { if (go.disabled) return; go.disabled = true; onStart(card); });
     card.appendChild(h("div", { class: "row end" }, go));
@@ -159,13 +165,15 @@
     updatePill();
     if (allDone()) BTL.markSiteDone && BTL.markSiteDone();
 
+    var V2 = window.VIS, vis2 = def.vis || {};
     var recap = h("section", { class: "card why stack" },
       h("div", { class: "kicker", text: "What you just saw" }),
       h("h2", { text: def.recap.title }),
-      def.recap.text.map(function (t) { return h("p", { text: t }); }),
-      def.recap.words ? h("dl", { class: "glossary" }, def.recap.words.map(function (w) {
+      V2 && vis2.recapDiagram ? V2.diagram(vis2.recapDiagram) : null,
+      V2 ? V2.recapCards(def.recap, vis2.points) : def.recap.text.map(function (t) { return h("p", { text: t }); }),
+      def.recap.words ? (V2 ? V2.glossary(def.recap.words) : h("dl", { class: "glossary" }, def.recap.words.map(function (w) {
         return [h("dt", { text: w[0] }), h("dd", { text: w[1] })];
-      })) : null);
+      }))) : null);
 
     var next = levels[def.num];
     var nextBtn = next
