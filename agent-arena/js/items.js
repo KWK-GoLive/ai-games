@@ -7,6 +7,7 @@
   "use strict";
   var T = (root.AGA && root.AGA.Tools) || require("./tools.js");
   var E = T.Engine;
+  var QB = root.QB || require("../../shared/querybuilder.js"); // plain-English wording of table commands
 
   function shuffle(a, rng) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function pick(a, rng) { return a[Math.floor(rng() * a.length)]; }
@@ -54,7 +55,7 @@
     return shuffle(D.searchQuestions, rng).slice(0, 4).map(function (sq) {
       var tgt = D.handbook.filter(function (c) { return c.id === sq.target; })[0];
       return { kind: "search", handbook: D.handbook, question: sq.q, target: sq.target, limit: 60, key: [tgt.title.toLowerCase()],
-        maxWords: MAX_WORDS, tries: TRIES, rank: function (q) { return searchRank(D, q, sq.target); },
+        maxWords: MAX_WORDS, tries: TRIES, rank: function (q) { return searchRank(D, q, sq.target); }, cards: shuffle(sq.cards, rng),
         title: "Find the right handbook piece for: “" + sq.q + "”",
         hint: "The right piece is “" + tgt.title + "”. Which word appears in it and in no other piece?",
         // answer = the list of queries tried, in order
@@ -68,7 +69,7 @@
             "Searching with the whole question would have put “" + naive.title + "” on top" + (naive.id === sq.target ? " too." : ", the wrong piece.") +
             " Keyword search only matches words; a word that appears in just one piece works best. The model then answers only from the pieces it gets."] };
         },
-        sample: function (r) { var ws = E.keywords(sq.q); return [pick(ws, r), pick(ws, r) + " " + pick(ws, r)]; }
+        sample: function (r) { return [pick(sq.cards, r), pick(sq.cards, r) + " " + pick(sq.cards, r)]; }
       };
     });
   }
@@ -123,14 +124,14 @@
       return { kind: "data", csv: D.rentalsCsv, question: dq.q, ref: dq.ref, limit: 120, key: { answer: key, calls: 1, errors: 0 },
         run: function (cmd) { return T.run(D.rentalsCsv, cmd); },
         title: dq.q,
-        hint: "A command that works here: " + dq.ref.replace(/(WHERE \w+ [=<>] ).*$/, "$1…"),
+        hint: "A question that works here: “" + QB.describe(dq.ref).replace(/(only where \w+ is (more than |less than )?).*$/, "$1…") + "”",
         grade: function (a) {
           a = a || {};
           var ok = matches(a.answer, key, dq.type, names);
           var calls = a.calls || 0, errors = a.errors || 0;
           var frac = ok ? Math.max(0.5, Math.round(100 * (1 - 0.1 * Math.max(0, calls - 2) - 0.1 * errors)) / 100) : 0;
-          return { frac: frac, explain: [(ok ? "Right: " : "The answer is ") + key + ". One command that finds it: " + dq.ref + ".",
-            "You made " + calls + " tool call" + (calls === 1 ? "" : "s") + " with " + errors + " error" + (errors === 1 ? "" : "s") + ". Up to 2 calls are free; each extra call or error costs 10%. Real agents also pay for every step, in time and money."] };
+          return { frac: frac, explain: [(ok ? "Right: " : "The answer is ") + key + ". One question that finds it: “" + QB.describe(dq.ref) + "” (the agent sends " + dq.ref + ").",
+            "You made " + calls + " tool call" + (calls === 1 ? "" : "s") + (errors ? " with " + errors + " error" + (errors === 1 ? "" : "s") : "") + ". Up to 2 calls are free; each extra call" + (errors ? " or error" : "") + " costs 10%. Real agents also pay for every step, in time and money."] };
         },
         sample: function (r) { return { answer: r() < 0.3 ? key : String(Math.floor(r() * 300)), calls: 1 + Math.floor(r() * 4), errors: Math.floor(r() * 2) }; }
       };
@@ -179,7 +180,7 @@
       run: function (cmd) { return T.run(D.rentalsCsv, cmd); },
       isRight: function (r) { return !!(r && r.ok && r.groups && JSON.stringify(r.groups) === JSON.stringify(truth)); },
       title: "Boss job",
-      hint: "Plan: look → total → check → make → ask. The command: TOTAL total BY branch WHERE bike = ebike.",
+      hint: "Plan: look → total → check → make → ask. The question: “" + QB.describe(BOSS_CMD) + "”.",
       grade: function (a) {
         a = a || {};
         var o = a.order || [];
