@@ -40,9 +40,9 @@
       V.cards([
         { icon: "✍️", title: "1 · Finish the sentence", text: "Guess how the chatbot ends a sentence." },
         { icon: "🔁", title: "2 · Same question, 5 times", text: "Does it say the same thing every time?" },
-        { icon: "🕵️", title: "3 · The made-up thing", text: "What does it do when we ask about something that doesn't exist?" }
+        { icon: "🕵️", title: "3 · The made-up thing", text: "What does it do when we ask about something that doesn't exist, or for references it can't check?" }
       ], { cols: 3 }),
-      h("p", { class: "muted small", text: "No score, no typing. About 5 minutes." }),
+      h("p", { class: "muted small", text: "No score, no typing. About 8–12 minutes." }),
       h("div", { class: "row end" }, btn("Start →", "primary", function () { sentence(0); }))));
   }
 
@@ -156,6 +156,34 @@
       out.appendChild(h("div", { class: "v-card accent" }, h("div", { class: "v-card-title", text: "🤔 Notice" }),
         h("p", { text: "In all " + M.replies.length + " of our runs it said it had no record of this race and gave no winner (3 of the 5 also said outright that they wouldn't invent one). Good!" }),
         h("p", { text: "Don't count on that every time, with every chatbot and every question: chatbots can still give confident answers that are wrong. In Be the LLM you'll see where such answers come from." })));
+      out.appendChild(h("div", { class: "row end" }, btn("One more test →", "primary", refs)));
+      out.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }
+
+  /* ---------- round 3b: ask for references (a classic place for made-up answers) ---------- */
+  function refs() {
+    clear();
+    var R = D.refs;
+    var card = h("section", { class: "card stack" },
+      progress(3),
+      h("div", { class: "kicker", text: "Round 3 · One more test" }),
+      h("p", { text: "Chatbots are known to sometimes invent references: real-looking papers that don't exist. A DOI is the ID number of a real published paper, so a fake one can be caught. We asked:" }),
+      h("div", { class: "pg-prompt", text: "“" + R.prompt + "”" }),
+      h("p", { style: "font-weight:600", text: "What do you think it did this time?" }));
+    var grid = h("div", { class: "choices", role: "group", "aria-label": "your guess" });
+    var out = h("div", { class: "stack" });
+    ["Gave 3 references with DOIs", "Said it can't check them", "Sometimes one, sometimes the other"].forEach(function (o) {
+      var b = h("button", { class: "choice", type: "button", text: o });
+      b.addEventListener("click", function () { Array.prototype.forEach.call(grid.children, function (x) { x.disabled = true; }); b.classList.add("picked"); show(); });
+      grid.appendChild(b);
+    });
+    card.appendChild(grid); card.appendChild(out); app.appendChild(card);
+    function show() {
+      out.appendChild(h("div", { class: "pg-replies" }, R.replies.map(function (r, i) { return reply(r, i + 1); })));
+      out.appendChild(h("div", { class: "v-card accent" }, h("div", { class: "v-card-title", text: "🤔 Notice" }),
+        h("p", { text: "In all " + R.replies.length + " runs it gave no reference and no DOI. It said it couldn't check them without searching, and pointed to places to search instead." }),
+        h("p", { text: "So this chatbot was careful twice (in these runs it was also told not to use any tools, so it didn't search). But other chatbots, other questions or other days can still produce answers that sound sure and are wrong. Why would a system that only guesses likely words ever do that? That's the next game." })));
       out.appendChild(h("div", { class: "row end" }, btn("Last step →", "primary", finale)));
       out.scrollIntoView({ behavior: "smooth", block: "start" });
     }
@@ -172,7 +200,7 @@
       h("div", { class: "pg-mystery" }, [
         ["❓", "How does it choose the next words?", "Be the LLM, Levels 1–3"],
         ["🎲", "Why did 5 identical questions get different answers?", "Be the LLM, Level 5"],
-        ["🕵️", "When does a chatbot make things up, and why does it sound so sure?", "Be the LLM, Levels 4 and 7"]
+        ["🕵️", "Our chatbot refused to make things up. Why do chatbots sometimes do it anyway, and sound so sure?", "Be the LLM, Levels 4 and 7"]
       ].map(function (m) { return h("div", { class: "v-card" }, h("span", { class: "v-card-icon sm", "aria-hidden": "true", text: m[0] }), h("div", {}, h("div", { class: "q", text: m[1] }), h("div", { class: "small muted", text: "Find out in " + m[2] }))); })),
       h("div", { class: "row end" }, h("a", { class: "btn", href: "../index.html", text: "All games" }), h("a", { class: "btn primary", href: "../be-the-llm/index.html", text: "Play Be the LLM →" })),
       h("p", { class: "pg-foot", text: "About these replies: recorded on " + D.recorded + " (UTC) from the Claude model “" + D.model + "”. Each reply came from a fresh chat with no memory of the others, run inside an AI agent tool and told to answer as in a normal chat, without tools. Replies are shown exactly as the model wrote them. Other chatbots, or the same one on another day, may answer differently." })));
