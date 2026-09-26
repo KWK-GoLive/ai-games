@@ -15,9 +15,9 @@ For anyone teaching beginners how AI assistants really work. It follows **Be the
 
 | Option | How | Time |
 |---|---|---|
-| **Projected, together** | `?mode=class&teacher=1`. Do Levels 1, 4 and 5 together; players do 2, 3 and 6 alone | 35–45 min with discussion |
-| **Solo, then discuss** | Everyone plays all 6, then a debrief with the prompts below | 35–40 min |
-| **Homework** | Full playthrough; open the files (view on screen or download) | 25–30 min |
+| **Projected, together** | `?mode=class&teacher=1`. Do Levels 1, 4 and 5 together; players do 2, 3 and 6 alone | 50–65 min with discussion (or two sittings) |
+| **Solo, then discuss** | Everyone plays all 6, then a debrief with the prompts below | 55–65 min (or two sittings: Levels 1–3, then 4–6) |
+| **Homework** | Full playthrough; open the files (view on screen or download) | 45–55 min (can be split: Levels 1–3, then 4–6) |
 
 ## Suggested moves
 
@@ -45,7 +45,7 @@ For anyone teaching beginners how AI assistants really work. It follows **Be the
 ## Things to know before you play
 
 - **What's simulated.** The agent's choices are pre-written replays, and the game says so. The calculator and table tool really compute, and the files are real. The web search result comes from a made-up site, labelled as such.
-- **Tokens.** The game estimates tokens as words × 4/3, a common rule of thumb for English. Real tokenizers differ by model and language, so the game always says "roughly".
+- **Tokens.** The game estimates tokens as words × 4/3, a common rule of thumb for English. Real tokenizers differ by model and language, so the game always says "roughly". Thai and many other languages need more tokens for the same meaning, and the game says so in Level 1.
 - **The desk size.** The toy desk holds 200 tokens so it fills quickly. The game says real chatbots hold far more without giving a number, because sizes differ between products and change often.
 - **Simplifications to mention if asked:**
   - Real apps may summarise old messages rather than drop them.

@@ -13,7 +13,7 @@ Everything runs in the browser with no libraries; it needs no internet once load
 | 5 | Files that give orders | the human | Prompt injection: find instructions hidden in an email and a web page |
 | 6 | You're the boss | the human | Approve or deny 8 agent requests; permissions and privacy |
 
-Each level opens with a "How it works" card and closes with a "What you just saw" recap and short glossary. The results screen shows how a chatbot app fits together (you ⇄ app ⇄ model) and five habits to take away. A full playthrough takes about 25–30 minutes; this is an estimate, not yet timed with players.
+Each level opens with a "How it works" card and closes with a "What you just saw" recap and short glossary. The results screen shows how a chatbot app fits together (you ⇄ app ⇄ model) and five habits to take away. A full playthrough takes about 45–55 minutes for novice, non-native readers; this is an estimate, not yet timed with players.
 
 **What is real and what is replayed.** The agent's decisions are pre-written, and the game says it is "a simplified replay". The tools are real:
 - the calculator and table tool really compute;
