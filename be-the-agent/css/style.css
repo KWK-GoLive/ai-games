@@ -364,3 +364,4 @@ table.data td, table.data th { padding: 4px 8px; }
 a.pill.home-link { text-decoration: none; color: inherit; }
 a.pill.home-link:hover { text-decoration: underline; }
 .done-tick { color: #1a7f37; font-weight: 600; }
+.mono { font-family: var(--mono); letter-spacing: .04em; }
