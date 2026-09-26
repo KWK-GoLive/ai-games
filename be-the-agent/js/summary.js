@@ -40,10 +40,16 @@
         h("li", {}, h("b", { text: "You're the boss. " }), "Approve anything permanent or external yourself, and keep personal data out of unapproved tools.")),
       h("p", { class: "muted small" }, "Want to see how the model itself works? ", h("a", { href: "../be-the-llm/index.html", text: "Play Be the LLM" }), ".")));
 
+    app.appendChild(h("section", { class: "card stack" },
+      h("div", { class: "kicker", text: "For your own data work" }),
+      h("h2", { text: "📋 Checking AI data work" }),
+      h("p", { text: "Six checks to use whenever AI works with your spreadsheets and reports: tool or guess, recompute one total, missing rows, claims beyond the data, privacy, show the formula." }),
+      h("div", { class: "row end" }, h("a", { class: "btn", href: "../checklist.html", text: "Open the checklist (printable)" }))));
+
     app.appendChild(h("section", { class: "card soft stack" },
       h("div", { class: "kicker", text: "Next: the challenge" }),
       h("h2", { text: "Agent Arena" }),
-      h("p", { text: "Now run the agent yourself against the clock: pack the desk, pick the tools, write the table commands, spot planted orders, and deliver a real file. Compete with your class on a live scoreboard." }),
+      h("p", { text: "Now run the agent yourself against the clock: pack the desk, pick the tools, ask the data questions, spot planted orders, and deliver a real file. Compete with your class on a live scoreboard." }),
       h("div", { class: "row end" }, h("a", { class: "btn primary", href: "../agent-arena/index.html", text: "Enter the Agent Arena \u2192" }))));
 
 

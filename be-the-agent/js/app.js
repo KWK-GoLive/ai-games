@@ -38,7 +38,7 @@
         { icon: "ℹ️", title: "Honest note", text: "The model\u2019s replies in this game are pre-written to show what typically happens (a simplified replay). The calculator, table tool, search ranking and file makers really run in your browser." }
       ]) : null,
       window.VIS ? window.VIS.flow([{ icon: "🧠", label: "Model" }, { icon: "⚙️", label: "App (harness)" }, { icon: "🧰", label: "Tools" }, { icon: "🧑\u200d💼", label: "You, in charge" }]) : null,
-      h("p", { class: "muted small" }, "No background needed. About 25\u201330 minutes. Haven't played Be the LLM? ",
+      h("p", { class: "muted small" }, "No background needed. About 45\u201355 minutes; you can stop after any level and carry on later. Haven't played Be the LLM? ",
         h("a", { href: "../be-the-llm/index.html", text: "Play Be the LLM first" }), " (recommended, not required).")));
 
     var grid = h("div", { class: "levels" });
