@@ -15,7 +15,7 @@ def serve():
     class Quiet(http.server.SimpleHTTPRequestHandler):
         def log_message(self, *a):
             pass
-    handler = functools.partial(Quiet, directory=ROOT)
+    handler = functools.partial(Quiet, directory=os.path.dirname(ROOT))  # serve the whole site (the game uses ../shared/)
     socketserver.TCPServer.allow_reuse_address = True
     httpd = socketserver.TCPServer(("127.0.0.1", 0), handler)  # any free port
     global PORT
@@ -50,7 +50,7 @@ def play_all(page, tag):
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.on("dialog", lambda d: d.accept())
-    page.goto(f"http://127.0.0.1:{PORT}/index.html")
+    page.goto(f"http://127.0.0.1:{PORT}/be-the-llm/index.html")
     assert page.locator(".level-card").count() == 7, "7 level cards"
     assert page.locator(".level-card[disabled]").count() == 6, "6 locked at start"
     body = page.inner_text("body")
@@ -67,6 +67,7 @@ def play_all(page, tag):
     shot(page, f"{tag}-02-L1-round")
     play_rounds(page)
     page.get_by_text("Level 1 complete").wait_for()
+    assert page.get_by_text("LLM1-ECBQ").count() == 1, "carry-on code shown after Level 1"
     assert page.get_by_text("What you just saw").count() == 1
     shot(page, f"{tag}-03-L1-done")
     next_level(page, 2)
@@ -210,7 +211,7 @@ def play_all(page, tag):
     shot(page, f"{tag}-14-summary")
 
     # Reload: progress kept, all unlocked
-    page.goto(f"http://127.0.0.1:{PORT}/index.html")
+    page.goto(f"http://127.0.0.1:{PORT}/be-the-llm/index.html")
     assert page.locator(".level-card[disabled]").count() == 0, "all unlocked after finishing"
     sw = page.evaluate("document.documentElement.scrollWidth")
     cw = page.evaluate("document.documentElement.clientWidth")
@@ -240,7 +241,7 @@ def main():
         page = ctx.new_page()
         errs = []
         page.on("pageerror", lambda e: errs.append(str(e)))
-        page.goto(f"http://127.0.0.1:{PORT}/index.html?mode=class&teacher=1")
+        page.goto(f"http://127.0.0.1:{PORT}/be-the-llm/index.html?mode=class&teacher=1")
         try:
             assert page.locator(".level-card[disabled]").count() == 0, "teacher unlocks all"
             assert page.get_by_text("Class mode").count() >= 1
@@ -267,7 +268,7 @@ def main():
         page = ctx.new_page()
         errs = []
         page.on("pageerror", lambda e: errs.append(str(e)))
-        page.goto(f"http://127.0.0.1:{PORT}/index.html?mode=class&teacher=1")
+        page.goto(f"http://127.0.0.1:{PORT}/be-the-llm/index.html?mode=class&teacher=1")
         try:
             sw = page.evaluate("document.documentElement.scrollWidth")
             assert sw <= 376, f"class+teacher at 375px overflows: {sw}"
@@ -299,7 +300,7 @@ def main():
         errs = []
         page.on("pageerror", lambda e: errs.append(str(e)))
         page.add_init_script("Object.defineProperty(window, 'localStorage', { get() { throw new Error('blocked'); } });")
-        page.goto(f"http://127.0.0.1:{PORT}/index.html")
+        page.goto(f"http://127.0.0.1:{PORT}/be-the-llm/index.html")
         if page.locator(".level-card").count() != 7 or errs:
             failures.append(f"blocked storage: {errs}")
         else:
