@@ -33,6 +33,14 @@ D.desks.forEach(function (d) {
   var need = d.cards.filter(function (c) { return c.need; }).map(function (c) { return c.id; });
   check(I.deskUse(D, d, need) <= d.capacity, d.id + ": the needed cards fit");
   check(I.deskUse(D, d, d.cards.map(function (c) { return c.id; })) > d.capacity, d.id + ": everything does NOT fit (so choosing matters)");
+  // v4 grading: harmless extra -10%, misleading extra -25%
+  var need2 = d.cards.filter(function (c) { return c.need; }).map(function (c) { return c.id; });
+  var it2 = I.STAGES[0].make(D, function () { return 0.5; }).filter(function (x) { return x.desk.id === d.id; })[0];
+  d.cards.filter(function (c) { return !c.need; }).forEach(function (c) {
+    var ids = need2.concat([c.id]);
+    if (I.deskUse(D, d, ids) > d.capacity) return;
+    check(Math.abs(it2.grade(ids).frac - (c.misleading ? 0.75 : 0.9)) < 1e-9, d.id + "/" + c.id + ": extra card costs " + (c.misleading ? "25%" : "10%"));
+  });
 });
 
 /* ---- search: the naive question never wins outright; at least one 1-word search does ---- */
