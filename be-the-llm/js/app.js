@@ -26,7 +26,7 @@
 
   function levelState(id) { return BTL.state.levels[id] || null; }
   function isUnlocked(def) {
-    if (ui.flags.teacher || def.num === 1) return true;
+    if (ui.flags.teacher || BTL.state.unlockAll || def.num === 1) return true;
     var prev = levels[def.num - 2];
     return !!(prev && levelState(prev.id) && levelState(prev.id).done);
   }
@@ -67,6 +67,7 @@
       grid.appendChild(b);
     });
     app.appendChild(grid);
+    var cb = codeBox(); if (cb) app.appendChild(cb);
 
     var endBtn = h("button", { class: "btn primary", type: "button", text: "See my results", disabled: !(allDone() || ui.flags.teacher) });
     endBtn.addEventListener("click", function () { BTL.renderSummary(app); });
@@ -77,6 +78,33 @@
       endBtn));
   }
   BTL.renderHome = renderHome;
+
+  /* ---------- carry-on codes (continue on another computer) ---------- */
+  function codeBox() {
+    var C = window.AIG_CODES;
+    if (!C) return null;
+    var inp = h("input", { class: "text-input", id: "carryCode", autocomplete: "off", placeholder: "e.g. LLM3-XXXX", style: "max-width:14em", "aria-label": "carry-on code" });
+    var msg = h("p", { class: "feedback", "aria-live": "polite" });
+    var form = h("form", { class: "row" }, inp, h("button", { class: "btn", type: "submit", text: "Use code" }));
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var r = C.check("llm", inp.value);
+      if (!r) { msg.className = "feedback bad"; msg.textContent = "That code doesn't match. Check it and try again."; return; }
+      if (r.otherGame) { msg.className = "feedback bad"; msg.textContent = "That code is for the other game. Open it from the list of all games."; return; }
+      if (r.all) { BTL.state.unlockAll = true; ui.save(); renderHome(); ui.toast("All levels unlocked."); return; }
+      levels.forEach(function (l) {
+        if (l.num <= r.level && !(levelState(l.id) && levelState(l.id).done)) BTL.state.levels[l.id] = { done: true, viaCode: true };
+      });
+      ui.save();
+      if (allDone() && BTL.markSiteDone) BTL.markSiteDone();
+      renderHome();
+      ui.toast(r.level >= levels.length ? "All levels marked done." : "Levels 1\u2013" + r.level + " marked done. Carry on with Level " + (r.level + 1) + ".");
+    });
+    return h("section", { class: "card soft stack", style: "margin-top:16px" },
+      h("h3", { text: "Carrying on from another computer?" }),
+      h("p", { class: "muted small", style: "margin:0", text: "Each level you finish shows a code. Type the code from the last level you finished to carry on from there." }),
+      form, msg);
+  }
 
   /* ---------- one level: how it works -> play -> what you just saw ---------- */
   function introCard(def, onStart) {
@@ -151,7 +179,9 @@
 
     var result = h("section", { class: "card stack" },
       h("div", { class: "kicker", text: "Level " + def.num + " complete" }),
-      res.summary ? h("p", { text: res.summary }) : null);
+      res.summary ? h("p", { text: res.summary }) : null,
+      window.AIG_CODES ? h("p", { class: "small muted" }, "Code to carry on from here on another computer: ",
+        h("b", { class: "mono", text: window.AIG_CODES.forLevel("llm", def.num) })) : null);
 
     var holder = h("div");
     holder.appendChild(result);
