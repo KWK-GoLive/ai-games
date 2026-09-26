@@ -61,5 +61,14 @@ var d = F.docx([{ h1: "T" }, { p: "x & <y>" }, { table: [["a"], ["b"]] }]);
 check(x[0] === 0x50 && x[1] === 0x4b, "xlsx starts with a zip signature");
 check(d[0] === 0x50 && d[1] === 0x4b, "docx starts with a zip signature");
 
+// v4: Level 2 search practice: some cards win on their own, some are traps
+(function () {
+  var P = D.searchPractice;
+  check(P && P.cards.length === 10 && new Set(P.cards).size === 10, "search practice: 10 different word cards");
+  var win = P.cards.filter(function (c) { var r = E.search(c, D.handbook); return r[0].chunk.id === P.target && r[0].score > 0 && r[0].score > r[1].score; });
+  var trap = P.cards.filter(function (c) { var r = E.search(c, D.handbook); return r[0].score > 0 && r[0].chunk.id !== P.target; });
+  check(win.length >= 1 && win.length <= 3, "search practice: 1-3 winning cards (" + win.join(",") + ")");
+  check(trap.length >= 3, "search practice: at least 3 trap cards (" + trap.join(",") + ")");
+})();
 console.log(failures ? failures + " check(s) FAILED" : "All checks passed");
 process.exit(failures ? 1 : 0);
