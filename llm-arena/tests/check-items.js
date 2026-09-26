@@ -90,11 +90,24 @@ for (var run = 0; run < RUNS; run++) {
         check(hf > 0 && hf < 1, where + ": part marks for a correct start");
         check(it.grade(it.key.concat(["x"])).frac < 1, where + ": extra pieces don't get full marks");
       }
-      if (st.id === "dice" && /what %/.test(it.title)) {
-        var T = Number(/temperature ([\d.]+)/.exec(it.title)[1]);
-        var w = /does “([^”]+)”/.exec(it.title)[1];
-        var idx = it.dice.dist.map(function (x) { return x.word; }).indexOf(w);
-        check(it.key === tempPct(it.dice.dist.map(function (x) { return x.count; }), T, idx), where + ": temperature %");
+      if (st.id === "dice") {
+        var cnt = it.dice.dist.map(function (x) { return x.count; });
+        check(!/square|root|\u221a/i.test(it.title + it.hint), where + ": no square/root maths in the question");
+        if (it.charts) {
+          // each chart = the independently computed chances at its temperature; the key is the asked temperature
+          var Tq = /temperature ([\d.]+)\?/.exec(it.title)[1];
+          check(it.key === Tq, where + ": chart key");
+          it.options.forEach(function (o) { o.bars.forEach(function (b, bi) { check(b.pct === tempPct(cnt, Number(o.value), bi), where + ": chart bars at T " + o.value); }); });
+          var sigs = it.options.map(function (o) { return o.bars.map(function (b) { return b.pct; }).join(","); });
+          check(new Set(sigs).size === sigs.length, where + ": the three charts look different");
+        }
+        if (/turn the temperature/.test(it.title)) {
+          var to = Number(/from 1 to (\d+(?:\.\d+)?)/.exec(it.title)[1]);
+          var ww = /happens to “([^”]+)”/.exec(it.title)[1], ix = it.dice.dist.map(function (x) { return x.word; }).indexOf(ww);
+          var a1 = tempPct(cnt, 1, ix), a2 = tempPct(cnt, to, ix);
+          check(it.key === (a2 > a1 ? "more" : a2 < a1 ? "less" : "same"), where + ": direction");
+          check(ix === 0 || ix === cnt.length - 1, where + ": asks about the top or bottom word only");
+        }
       }
       if (st.id === "keyhole") {
         var d2 = follow(it.world, it.prefix.slice(-it.k));
