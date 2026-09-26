@@ -103,9 +103,9 @@
     return withTimeout(fetch(URL_ + (URL_.indexOf("?") >= 0 ? "&" : "?") + q, { cache: "no-store" }).then(function (r) { return r.json(); }), 10000);
   }
   function apiPost(obj) {
-    // text/plain keeps this a "simple" request, so the browser doesn't need a CORS preflight that Apps Script can't answer.
-    return withTimeout(fetch(URL_, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(obj) })
-      .then(function (r) { return r.json(); }), 15000);
+    // Sent as a GET: a browser POST to Apps Script gets redirected and the reply can be lost (seen in Chrome),
+    // while GET replies arrive reliably. The server treats action=post exactly like a POST. Payloads are small.
+    return withTimeout(apiGet({ action: "post", payload: JSON.stringify(obj), t: Date.now() }), 15000);
   }
 
   var ARENA = window.ARENA = {
