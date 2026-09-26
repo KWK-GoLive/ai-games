@@ -52,6 +52,7 @@ No names, emails or student IDs are stored.
 - A team's score is the average of its members, so team size doesn't matter.
 - **Download results (CSV)** on the board gives one row per student per stage (plus the "joined" rows), for both arenas. The `counted` column marks first runs.
 - Reloading the page carries on with the same item, and its timer keeps running.
+- **Speed:** the Sheet saves about one result per second. If a whole class finishes a stage at the same moment, some results take up to half a minute to appear, and any that time out are re-sent automatically. (Tested live with 30 results sent at once: all arrived.)
 - **No connection?** Stage results wait on the device and are sent automatically when the connection returns.
 - **Limitation:** scores are computed in the browser, so a determined student could fake one, or start again under a new nickname. Treat the board as motivation, not as assessment evidence.
 
