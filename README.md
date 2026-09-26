@@ -47,7 +47,7 @@ No names, emails or student IDs are stored.
 
 - Give each class a **class code**, for example `AI-SEC1`.
 - Project `board.html?class=AI-SEC1` (add `&projector=1` for big text). It refreshes every few seconds.
-- Students open the site on their own devices and play the arena. Each enters a nickname, an optional team name (teammates type the same one) and the class code.
+- Students open the site on their own devices and sign in once on the front page ("Who's playing?"): a nickname, an optional team name (teammates type the same one) and the class code. Both arenas pick it up and show "Playing as …", with a **Change** button.
 - **Only the first complete run counts.** Later runs are practice runs and are not sent. The scoreboard also keeps only the first run for each nickname. If a nickname is already used in that class, the game asks for another one.
 - A team's score is the average of its members, so team size doesn't matter.
 - **Download results (CSV)** on the board gives one row per student per stage (plus the "joined" rows), for both arenas. The `counted` column marks first runs.
