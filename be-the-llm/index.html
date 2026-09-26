@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light only">
+  <title>Be the LLM</title>
+  <meta name="description" content="A seven-level game: play the part of a language model, guess the next word, and find out how a chatbot answers questions.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231f5fbf'/%3E%3Crect x='6' y='20' width='4' height='6' rx='1' fill='white'/%3E%3Crect x='12' y='14' width='4' height='12' rx='1' fill='white'/%3E%3Crect x='18' y='9' width='4' height='17' rx='1' fill='white'/%3E%3Crect x='24' y='17' width='4' height='9' rx='1' fill='white'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" id="brand" type="button" aria-label="Back to level map">Be the <span>LLM</span></button>
+    <span class="spacer"></span>
+    <span class="pill mode hidden" id="modePill"></span>
+    <a class="pill home-link" href="../index.html">&larr; All games</a>
+  </header>
+
+  <main id="app">
+    <noscript><div class="card">This game needs JavaScript switched on.</div></noscript>
+  </main>
+
+  <footer>
+    <p>Be the LLM: a tiny, see-through language model that runs in your browser. Progress is saved in this browser only.
+      <button type="button" id="resetBtn">Reset my progress</button></p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="data/corpus.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/facts.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/levels/L1.js"></script>
+  <script src="js/levels/L2.js"></script>
+  <script src="js/levels/L3.js"></script>
+  <script src="js/levels/L4.js"></script>
+  <script src="js/levels/L5.js"></script>
+  <script src="js/levels/L6.js"></script>
+  <script src="js/levels/L7.js"></script>
+  <script src="js/summary.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
