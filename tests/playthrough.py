@@ -158,6 +158,28 @@ def main():
         shot(pg, "site-01-master")
         results.append("master page: 4 games in order + board link")
 
+        # front-page sign-in is picked up by the arena ("Playing as ..."), and "Change" still works
+        pg = new_page(br, MOCK_URL)
+        pg.goto(BASE + "/index.html")
+        pg.fill("#p-nick", "Front Kid"); pg.fill("#p-team", "Blue"); pg.fill("#p-class", "sec-9")
+        pg.get_by_role("button", name="Save").click()
+        pg.get_by_text("Playing as").wait_for()
+        assert "class SEC-9" in pg.inner_text("#signin")
+        pg.goto(f"{BASE}/llm-arena/index.html?test=1")
+        pg.get_by_text("Playing as").wait_for()
+        assert "Front Kid" in pg.inner_text("#app") and "class SEC-9" in pg.inner_text("#app")
+        pg.get_by_role("button", name="Start my run").first.click()
+        pg.get_by_text("Start stage 1").wait_for()
+        pg.goto(f"{BASE}/agent-arena/index.html?test=1")
+        pg.get_by_role("button", name="Change").click()
+        assert pg.input_value("#nick") == "Front Kid" and pg.input_value("#classCode") == "SEC-9"
+        pg.fill("#nick", "Front Kid2"); pg.get_by_role("button", name="Start my run").click()
+        pg.get_by_text("Start stage 1").wait_for()
+        pg.goto(BASE + "/index.html")
+        assert "Front Kid2" in pg.inner_text("#signin"), "a change in the arena updates the front page"
+        assert not pg.errors, pg.errors
+        results.append("front-page sign-in: both arenas pick it up; Change works and syncs back")
+
         # ---------- 2. both arenas through the real widgets, offline mode (no scoreboard) ----------
         for game in ["llm-arena", "agent-arena"]:
             pg = new_page(br)
