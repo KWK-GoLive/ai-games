@@ -320,6 +320,8 @@ a.btn { text-decoration: none; }
 .toolcall, .toolresult { font-family: var(--mono); font-size: .9rem; padding: 10px 12px; border-radius: 10px; overflow-wrap: anywhere; }
 .toolcall { background: #1b2130; color: #e8ecf4; }
 .toolcall .who, .toolresult .who { display: block; font-family: var(--font); font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; opacity: .8; margin-bottom: 4px; }
+.toolcall .plain { display: block; font-family: var(--font); font-size: .98rem; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+.toolcall code { opacity: .75; font-size: .82rem; }
 .toolresult { background: var(--good-soft); color: var(--ink); border: 1px solid var(--good); }
 .toolresult.err { background: var(--warn-soft); border-color: var(--warn); }
 table.data { font-size: .9rem; }
