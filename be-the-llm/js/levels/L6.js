@@ -20,9 +20,10 @@
         "With one word visible, many next words are possible. Each extra word you (and the model) could see narrowed it down. That is why the chat model in Level 4 needed a window of 8 words: with only 3, it would lose track of which question was asked.",
         "Our counting model has a weakness you saw in the “never seen” round: it only works with word strings it has seen exactly, so a longer window can leave it with no data at all. In the back-off round you saw its fix: drop the oldest word and look again, until something matches. The chat model in Levels 4, 5 and 7 does exactly this with its 8-word window.",
         "Real chatbots don't need exact matches and don't back off like this: they learn patterns, so they can use the whole window even for sentences they have never seen.",
-        "Real chatbots have a very large window: often whole documents plus your conversation so far. That's how they can refer back to something you said earlier. In a very long conversation, though, the earliest parts can still fall out of the window, so repeat key facts near your question."
+        "Real chatbots have a very large window, measured in tokens (small pieces of text, see below): often whole documents plus your conversation so far. That's how they can refer back to something you said earlier. In a very long conversation, though, the earliest parts can still fall out of the window, so repeat key facts near your question."
       ],
       words: [["Context window", "How much text the model can see at once when it guesses the next word."],
+        ["Token", "A small piece of text. Real models count their window in tokens, not words. In English one token is roughly three-quarters of a word; other languages, including Thai, often need more tokens for the same meaning."],
         ["Back-off", "Our counting model's trick for words it has never seen together: drop the oldest word and look again, until the words match its training text."]]
     },
     run: function (container, done) {
@@ -32,11 +33,14 @@
       var model = BTL.model;
       var n = (CFG.ROUNDS && CFG.ROUNDS.L6) || 5;
 
+      // The model's pick with k words visible. On a tie, this model takes the word it saw first (the list keeps that order).
       function top(prefix, k) {
         var d = model.next(prefix, k);
-        if (!d.length) return null;
-        if (d.length > 1 && d[0].count === d[1].count) return "tie";
-        return d[0].word;
+        return d.length ? d[0].word : null;
+      }
+      function isTie(prefix, k) {
+        var d = model.next(prefix, k);
+        return d.length > 1 && d[0].count === d[1].count;
       }
       var pool = C.context.map(function (it) {
         var p = M.tokenize(it.prefix);
@@ -131,7 +135,7 @@
               "The model never saw “" + ctx.map(M.displayWord).join(" ") + "” anywhere in its training text, so it has nothing to count. A counting model only knows word strings it has seen exactly."));
           } else {
             stage.appendChild(ui.barsEl(d, { top: 3 }));
-            if (t === "tie") stage.appendChild(h("p", { class: "small muted", style: "margin:4px 0 0", text: "Tie at the top: the model can't decide." }));
+            if (isTie(it.prefix, k)) stage.appendChild(h("p", { class: "small muted", style: "margin:4px 0 0", text: "⚖️ Tie at the top: this model takes the one it saw first right after " + (k === 1 ? "this word" : "these words") + " in its training text, “" + M.displayWord(t) + "”." }));
           }
           stages.appendChild(stage);
           if (k < 3) {

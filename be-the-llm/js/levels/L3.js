@@ -10,7 +10,7 @@
     desc: "See the model's percentages, then write a whole sentence one word at a time.",
     goal: "Part A: guess again, but now you can see the model's probability for each choice. Part B: write a whole sentence by picking one word at a time.",
     intro: [
-      { title: "Now you can peek at the model's numbers.", text: "Each choice shows how often the model saw that word after the previous word.", ex: "I left my ___   sister 11% \u00b7 keys 6% \u00b7 phone 6%" },
+      { title: "Now you can peek at the model's numbers.", text: "Each choice shows how often the model saw that word after the previous word.", ex: "I left my ___   sister 11% \u00b7 keys 5% \u00b7 phone 5%" },
       { title: "The highest % is the most likely word,", text: "not a guaranteed right answer. Real text sometimes takes the less common path." },
       { title: "Then: a whole sentence.", text: "Pick a word, add it to the text, and the model guesses again. Repeat until you choose [end] (a marker meaning “the sentence stops here”). This loop is how a chatbot writes every answer." }
     ],
@@ -30,12 +30,20 @@
       var fresh = ui.shuffle(pool.filter(function (t) { return used.indexOf(t.s) < 0; }));
       var reused = ui.shuffle(pool.filter(function (t) { return used.indexOf(t.s) >= 0; }));
       var tests = fresh.concat(reused).slice(0, n);
-      var items = tests.map(function (t) { return ui.makeItem(BTL.model, t, "probs", BTL.vocab); });
+      // Always one tie round: two words share the top count, and the player learns this model's tie rule.
+      function isTie(t) {
+        // a real tie at the top between two words ([end] must not be one of them: it is never a choice here)
+        var w = M.tokenize(t.s), d = BTL.model.next(w.slice(0, t.k), 1);
+        return d.length > 1 && d[0].count === d[1].count && d[0].word !== M.END && d[1].word !== M.END;
+      }
+      var tieTest = tests.filter(isTie)[0] || ui.shuffle(pool.filter(isTie))[0];
+      if (tieTest && tests.indexOf(tieTest) < 0) tests[Math.min(2, tests.length - 1)] = tieTest;
+      var items = tests.map(function (t) { return ui.makeItem(BTL.model, t, "probs", BTL.vocab, { showTie: t === tieTest }); });
       var partA = null;
 
       container.appendChild(h("div", { class: "card soft" },
         h("div", { class: "kicker", text: "Part A" }),
-        h("p", { style: "margin:0", text: "The bar under each choice shows how often the model saw that word after the previous word in training. The real answer can be any of the four, even a low-% one. Use the numbers, or overrule them." })));
+        h("p", { style: "margin:0", text: "The bar under each choice shows how often the model saw that word after the previous word in training. The real answer can be any of the four, even a low-% one. Use the numbers, or overrule them. If two words tie at the top, this model takes the one it saw first right after that word in its training text." })));
 
       ui.guessRounds(container, {
         items: items,

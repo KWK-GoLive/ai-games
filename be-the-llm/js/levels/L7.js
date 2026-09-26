@@ -18,7 +18,7 @@
       title: "Sounding sure is not the same as being right",
       text: [
         "Every answer came out in the same calm, fluent style, true or not. A made-up answer that sounds right is called a hallucination. It isn't lying or glitching: it is doing exactly what it always does, writing likely words.",
-        "Real chatbots know vastly more than our toy, so they hallucinate much less often, but the cause is the same: they produce likely text, and likely is not the same as true. They are also often trained and tested in ways that reward a confident guess over \u201cI don't know\u201d.",
+        "Real chatbots know vastly more than our toy, so they hallucinate much less often, but the cause is the same: they produce likely text, and likely is not the same as true. Be extra careful with exact numbers, quotes, references and recent events. They are also often trained and tested in ways that reward a confident guess over \u201cI don't know\u201d.",
         "So treat a chatbot like a very fluent helper, not a source: when a fact, number, name or quote matters, check it somewhere reliable. And it helps to tell the chatbot it may say \u201cI don't know\u201d."
       ],
       words: [["Hallucination", "A confident, fluent answer that isn't supported by any real source."]]
@@ -40,9 +40,12 @@
 
       var nMade = Math.min(C.unanswerable.length, Math.ceil(n / 2));
       var nReal = Math.min(factQs.length, n - nMade);
+      // The sum question is always one of the made-up ones: numbers are just likely words to this model too.
+      var SUM = C.unanswerable.filter(function (q) { return / plus /.test(q); })[0];
+      var made = (SUM ? [SUM] : []).concat(ui.pick(C.unanswerable.filter(function (q) { return q !== SUM; }), Math.max(0, nMade - (SUM ? 1 : 0))));
       var items = ui.shuffle(
-        ui.pick(factQs, nReal).map(function (q) { return { q: q } })
-          .concat(ui.pick(C.unanswerable, nMade).map(function (q) { return { q: q }; })));
+        ui.pick(factQs.filter(function (q) { return !/ plus /.test(q); }), nReal).map(function (q) { return { q: q }; })
+          .concat(made.map(function (q) { return { q: q }; })));
       items.forEach(function (it) {
         it.words = M.tokenize(it.q);
         it.r = chat.answer(it.words, 0);
@@ -115,6 +118,10 @@
           ex.forEach(function (p) { box.appendChild(ui.tokenStrip(M.qaSequence(p[0], p[1]))); });
         } else {
           box.appendChild(h("p", { class: "small", style: "margin:0", text: "It stitched the answer together from pieces of different examples." }));
+        }
+        if (it.words.indexOf("plus") >= 0) {
+          box.appendChild(h("p", { class: "small", style: "margin:0" }, h("b", { text: "It never did the sum. " }),
+            "It copied the number that came after a similar-looking question. To a language model a number is just another likely word. That's why AI agents hand sums to a calculator tool (you'll see this in Be the Agent, Level 3)."));
         }
         // Was one of its choices a coin-flip?
         for (var s = 0; s < it.r.trail.length; s++) {

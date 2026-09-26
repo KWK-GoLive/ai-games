@@ -39,7 +39,7 @@
         onDone: function (res) {
           ui.clear(container);
           container.appendChild(ui.hvmEl(res,
-            "The model picked whichever choice it had seen most often after the previous word, using one word of memory and nothing else. Where did it beat you? Where did reading the whole sentence help you?"));
+            "The model picked whichever choice it had seen most often after the previous word, seeing only the one word before the blank and nothing else. Where did it beat you? Where did reading the whole sentence help you?"));
           var frac = res.correct / res.n;
           done({
             stars: frac >= 0.75 ? 3 : frac >= 0.5 ? 2 : 1,
