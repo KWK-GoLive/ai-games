@@ -4,7 +4,7 @@ Run from the project folder:  python3 tests/playthrough.py
 Serves the folder on a local port, plays every level at phone and desktop width,
 tests class mode and teacher mode, and fails on any console error.
 """
-import http.server, socketserver, threading, os, sys, functools
+import re, http.server, socketserver, threading, os, sys, functools
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -159,9 +159,19 @@ def play_all(page, tag):
         if nb.count():
             nb.click()
         else:
-            page.get_by_role("button", name="Finish level").click()
+            page.get_by_role("button", name="Last round: back-off").click()
             break
     assert saw_no_data, "L6 always includes the 'never seen' round"
+    # back-off round: answers are computed by the model; check the trail it shows
+    page.get_by_role("button", name=re.compile("drops the oldest word")).click()
+    page.get_by_text("✓ 2 words: “at the”").wait_for()
+    assert page.get_by_text("✗ 3 words: “meet at the”").count() == 1
+    page.get_by_role("button", name=re.compile("1 word: “my”")).click()
+    page.get_by_text("✓ 1 word: “my”").wait_for()
+    assert page.get_by_text("✗ 2 words: “miss my”").count() == 1
+    assert page.locator(".feedback.good").count() == 2, "both back-off answers marked right"
+    shot(page, f"{tag}-11b-L6-backoff")
+    page.get_by_role("button", name="Finish level").click()
     page.get_by_text("Level 6 complete").wait_for()
     next_level(page, 7)
 
