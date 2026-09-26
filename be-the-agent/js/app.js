@@ -30,12 +30,15 @@
   function renderHome() {
     ui.clear(app); top(); updatePill();
     app.appendChild(h("section", { class: "card" },
-      h("div", { class: "kicker", text: "Game 2 \u00b7 A game about AI assistants" }),
+      h("div", { class: "kicker", text: "Game 5 \u00b7 A game about AI assistants" }),
       h("h1", { text: "Be the Agent." }),
-      h("p", { text: "In the first game you saw that a language model does one thing: it guesses the next word. So how can a chatbot read your files, do sums it can't reliably do in its head, and hand you a real Excel file?" }),
-      h("p", { text: "The answer is the app built around the model. In six levels you'll take turns playing the model, the app around it, and the human in charge, using the files of a small made-up caf\u00e9, Moonbean Caf\u00e9." }),
-      h("p", { class: "small", text: "Honest note: the model\u2019s replies in this game are pre-written to show what typically happens (a simplified replay). The calculator, table tool, search ranking and file makers really run in your browser." }),
-      h("p", { class: "muted small" }, "No background needed. About 25\u201330 minutes. Haven't played the first game? ",
+      window.VIS ? window.VIS.cards([
+        { icon: "❓", title: "The puzzle", text: "In Be the LLM you saw that a language model does one thing: it guesses the next word. So how can a chatbot read your files, do sums it can't reliably do in its head, and hand you a real Excel file?" },
+        { icon: "⚙️", title: "The answer: the app around it", text: "The answer is the app built around the model. In six levels you'll take turns playing the model, the app around it, and the human in charge, using the files of a small made-up caf\u00e9, Moonbean Caf\u00e9." },
+        { icon: "ℹ️", title: "Honest note", text: "The model\u2019s replies in this game are pre-written to show what typically happens (a simplified replay). The calculator, table tool, search ranking and file makers really run in your browser." }
+      ]) : null,
+      window.VIS ? window.VIS.flow([{ icon: "🧠", label: "Model" }, { icon: "⚙️", label: "App (harness)" }, { icon: "🧰", label: "Tools" }, { icon: "🧑\u200d💼", label: "You, in charge" }]) : null,
+      h("p", { class: "muted small" }, "No background needed. About 25\u201330 minutes. Haven't played Be the LLM? ",
         h("a", { href: "../be-the-llm/index.html", text: "Play Be the LLM first" }), " (recommended, not required).")));
 
     var grid = h("div", { class: "levels" });
@@ -96,17 +99,20 @@
   function introCard(def, onStart) {
     var card = h("section", { class: "card stack intro" },
       h("div", { class: "kicker", text: "How it works" }));
-    var steps = h("ol", { class: "steps" });
-    def.intro.forEach(function (c) {
-      steps.appendChild(h("li", { class: "step" },
-        h("div", { class: "step-text" },
-          c.title ? h("b", { text: c.title }) : null,
-          c.title ? " " : null,
-          c.text),
-        c.ex ? h("div", { class: "step-ex", text: c.ex, "aria-hidden": c.exSr ? "true" : null }) : null,
-        c.exSr ? h("span", { class: "sr-only", text: c.exSr }) : null));
-    });
-    card.appendChild(steps);
+    var vis = (def.vis || {});
+    var V = window.VIS;
+    if (V) {
+      if (vis.diagram) card.appendChild(V.diagram(vis.diagram));
+      card.appendChild(V.introSteps(def.intro, vis.icons));
+    } else {
+      var steps = h("ol", { class: "steps" });
+      def.intro.forEach(function (c) {
+        steps.appendChild(h("li", { class: "step" },
+          h("div", { class: "step-text" }, c.title ? h("b", { text: c.title }) : null, c.title ? " " : null, c.text),
+          c.ex ? h("div", { class: "step-ex", text: c.ex }) : null));
+      });
+      card.appendChild(steps);
+    }
     card.appendChild(h("p", { class: "small muted", style: "margin:0", text: "The model\u2019s replies in this level are a simplified replay; the tools really run." }));
     var go = h("button", { class: "btn primary", type: "button", text: "Got it, let's play" });
     go.addEventListener("click", function () { if (go.disabled) return; go.disabled = true; onStart(card); });
@@ -145,13 +151,15 @@
     updatePill();
     if (allDone()) BTA.markSiteDone && BTA.markSiteDone();
 
+    var V2 = window.VIS, vis2 = def.vis || {};
     var recap = h("section", { class: "card why stack" },
       h("div", { class: "kicker", text: "What you just saw" }),
       h("h2", { text: def.recap.title }),
-      def.recap.text.map(function (t) { return h("p", { text: t }); }),
-      def.recap.words ? h("dl", { class: "glossary" }, def.recap.words.map(function (w) {
+      V2 && vis2.recapDiagram ? V2.diagram(vis2.recapDiagram) : null,
+      V2 ? V2.recapCards(def.recap, vis2.points) : def.recap.text.map(function (t) { return h("p", { text: t }); }),
+      def.recap.words ? (V2 ? V2.glossary(def.recap.words) : h("dl", { class: "glossary" }, def.recap.words.map(function (w) {
         return [h("dt", { text: w[0] }), h("dd", { text: w[1] })];
-      })) : null);
+      }))) : null);
 
     var next = levels[def.num];
     var nextBtn = next

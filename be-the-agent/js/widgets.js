@@ -82,8 +82,14 @@
 
   /* A tool request the model writes, e.g.  CALL calculator("1284 * 37") */
   function toolCall(tool, input) {
+    var plain = null;
+    if (tool === "table" && window.QB) {
+      var m = /^([^:]+):\s*(.*)$/.exec(input);
+      plain = h("span", { class: "plain", text: "In plain words: " + window.QB.describe(m ? m[2] : input) + (m ? " (in " + m[1] + ")" : "") });
+    }
     return h("div", { class: "toolcall" },
       h("span", { class: "who", text: "Model writes a tool request" }),
+      plain,
       h("code", { text: "CALL " + tool + "(" + JSON.stringify(input) + ")" }));
   }
   function toolResult(text, ok) {
