@@ -42,7 +42,7 @@
       h("h1", { text: "Watch a Real Agent" }),
       h("p", { class: "goal-line", text: "An AI agent is a chatbot that can use tools and make things. We gave a real one a file and a job, and recorded every step it took. Guess what it does next, then check its work." }),
       V.flow([{ icon: "📄", label: "A file goes in" }, { icon: "🤖", label: "The agent works", sub: "step by step" }, { icon: "📊", label: "Files come out" }, { icon: "🧐", label: "You check them" }]),
-      h("p", { class: "muted small", text: "No score, no typing. About 6 minutes." }),
+      h("p", { class: "muted small", text: "No score, no typing. About 10–15 minutes." }),
       h("div", { class: "row end" }, btn("Start →", "primary", job))));
   }
 
@@ -59,6 +59,15 @@
   }
 
   /* ---------- replay, one step per screen, with a guess before some steps ---------- */
+  /* Long computer paths are shortened on screen (the exact text stays one tap away). */
+  function shortPaths(t) {
+    return String(t)
+      .replace(/\/tmp\/claude-0\/[^\s'"]*?\/scratchpad\//g, "[scratch folder]/")
+      .replace(/\/home\/claude\/agent-case\//g, "[shop folder]/")
+      .replace(/\/home\/claude\/agent-case\b/g, "[shop folder]")
+      .replace(/\/mnt\/skills\/public\/(xlsx|docx)\/scripts\//g, "[$1 guide's tools]/")
+      .replace(/\/root\/\.claude\/skills\/synced\/[^\s'"]*?\/(xlsx|docx)\//g, "[$1 guide]/");
+  }
   function stepCard(s, n) {
     return h("section", { class: "card stack pg-step" },
       h("div", { class: "kicker", text: "Step " + (n + 1) + " of " + D.steps.length }),
@@ -66,8 +75,11 @@
       s.said ? h("div", {}, h("div", { class: "pg-label", text: "🤖 The agent wrote" }), h("p", { class: "pg-said", text: "“" + s.said + "”" })) : null,
       s.calls.map(function (c) {
         return h("div", { class: "stack" },
-          h("div", {}, h("div", { class: "pg-label", text: "🔧 Tool: " + c.tool }), h("pre", { class: "pg-code", text: c.call })),
-          c.result !== null && c.result !== undefined ? h("div", {}, h("div", { class: "pg-label", text: "📥 What came back" }), h("pre", { class: "pg-out", text: c.result })) : null,
+          c.caption ? h("p", { class: "pg-caption", text: "👉 " + c.caption }) : null,
+          h("div", {}, h("div", { class: "pg-label", text: "🔧 Tool: " + c.tool }), h("pre", { class: "pg-code", text: shortPaths(c.call) }),
+            shortPaths(c.call) !== c.call ? h("details", { class: "v-more" }, h("summary", { text: "Show the exact command" }), h("pre", { class: "pg-code", text: c.call })) : null),
+          c.result !== null && c.result !== undefined ? h("div", {}, h("div", { class: "pg-label", text: "📥 What came back" }), h("pre", { class: "pg-out", text: shortPaths(c.result) }),
+            shortPaths(c.result) !== c.result ? h("details", { class: "v-more" }, h("summary", { text: "Show the exact result" }), h("pre", { class: "pg-out", text: c.result })) : null) : null,
           c.note ? h("p", { class: "small muted", text: c.note }) : null);
       }),
       s.said2 ? h("div", {}, h("div", { class: "pg-label", text: "🤖 Then the agent wrote" }), h("p", { class: "pg-said", text: "“" + s.said2 + "”" })) : null,
@@ -160,13 +172,13 @@
       h("div", { class: "kicker", text: "Four mysteries" }),
       h("h2", { text: "A model only writes text. So how did it do all that?" }),
       h("div", { class: "pg-mystery" }, [
-        ["📄", "How did it “read” sales.csv?", "Levels 1 and 2"],
+        ["📄", "How did it “read” sales.csv?", "Levels 1–3"],
         ["🧮", "Why write a program instead of adding up in its head?", "Level 3"],
         ["🔁", "Why plan, act, check and fix, again and again?", "Level 4"],
         ["🧑‍💼", "What should an agent never do without asking you?", "Levels 5 and 6"]
       ].map(function (m) { return h("div", { class: "v-card" }, h("span", { class: "v-card-icon sm", "aria-hidden": "true", text: m[0] }), h("div", {}, h("div", { class: "q", text: m[1] }), h("div", { class: "small muted", text: "Find out in Be the Agent, " + m[2] }))); })),
       h("div", { class: "row end" }, h("a", { class: "btn", href: "../index.html", text: "All games" }), h("a", { class: "btn primary", href: "../be-the-agent/index.html", text: "Play Be the Agent →" })),
-      h("p", { class: "pg-foot", text: "About this run: recorded on " + D.recorded + " (UTC). The agent was the Claude model “" + D.model + "” working in an AI agent tool that can run commands and programs and read and write files. We gave it sales.csv, the owner's request, and three instructions: work as it normally would, only read and write inside the shop's folder, and finish with a short message for the owner. Every tool step is shown, in the order it happened; long commands and results are shortened (“…” marks a cut) but not changed. The files are the real outputs. Another run could take different steps." })));
+      h("p", { class: "pg-foot", text: "About this run: recorded on " + D.recorded + " (UTC). The agent was the Claude model “" + D.model + "” working in an AI agent tool that can run commands and programs and read and write files. We gave it sales.csv, the owner's request, and three instructions: work as it normally would, only read and write inside the shop's folder, and finish with a short message for the owner. Every tool step is shown, in the order it happened; long commands and results are shortened (“…” marks a cut) but not changed, and long folder paths are shown as labels like [scratch folder]. “Show the exact command” gives the recorded text (still with the same “…” cuts); the uncut recorded steps are in the site's repository (pregames/data/raw/agent-run.json). The files are the real outputs. Another run could take different steps." })));
   }
 
   intro();
