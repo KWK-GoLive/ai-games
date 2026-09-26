@@ -241,3 +241,10 @@ footer button { background: none; border: 0; color: var(--ink-2); text-decoratio
 .lesson-icon { font-size: 1.6rem; line-height: 1.2; }
 .goal-line { font-size: 1.05rem; }
 .search-bar { flex: 1; min-width: 12rem; min-height: 44px; display: flex; align-items: center; padding: 6px 12px; border-radius: 10px; background: var(--surface-2); font-weight: 700; }
+/* Dice master chart options (v4) */
+.mini-chart { display: grid; gap: 4px; width: 100%; text-align: left; }
+.mc-letter { font-size: .85rem; }
+.mc-row { display: grid; grid-template-columns: 4.2em 1fr 3em; gap: 6px; align-items: center; font-size: .85rem; font-weight: 400; }
+.mc-bar { height: 12px; background: var(--bar-track); border-radius: 6px; overflow: hidden; }
+.mc-bar i { display: block; height: 100%; background: var(--accent); }
+.mc-pct { text-align: right; font-variant-numeric: tabular-nums; }

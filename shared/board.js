@@ -89,6 +89,7 @@
         h("td", {}, h("b", { text: p.nickname }), p.team ? h("div", { class: "small muted", text: p.team }) : null),
         p.perStage.map(function (v) { return h("td", { class: "num", text: v == null ? "·" : String(v) }); }),
         h("td", { class: "num", text: p.correct + "/" + p.items }),
+        h("td", { class: "num acc", text: p.items ? Math.round(100 * p.correct / p.items) + "%" : "–" }),
         h("td", { class: "num" }, h("b", { text: String(p.points) }))));
     });
     body.appendChild(h("section", { class: "card stack" },
@@ -96,8 +97,9 @@
       h("div", { class: "table-wrap" }, h("table", { class: "board" },
         h("thead", {}, h("tr", {}, h("th", { text: "#" }), h("th", { text: "Player" }),
           names.map(function (n, i) { return h("th", { class: "num", title: n, text: "S" + (i + 1) }); }),
-          h("th", { class: "num", text: "Right" }), h("th", { class: "num", text: "Points" }))),
+          h("th", { class: "num", text: "Right" }), h("th", { class: "num", title: "Share of answers fully right (speed doesn't count here)", text: "% right" }), h("th", { class: "num", text: "Points" }))),
         tb)),
+      h("p", { class: "muted small", text: "Points include speed bonuses. “% right” shows careful answers, whatever the speed." }),
       h("p", { class: "muted small", text: "S1–S6 = stages: " + names.map(function (n, i) { return (i + 1) + " " + n; }).join(" · ") + ". Only each nickname's first run counts. Ties: more fully right answers, then less time." })));
     if (r.teams.length) {
       body.appendChild(h("section", { class: "card stack" },

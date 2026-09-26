@@ -191,3 +191,4 @@
 .tap-val:disabled { cursor: default; opacity: .8; }
 .tap-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; max-width: 26rem; }
 .v-sheet td.wrap { white-space: normal; min-width: 10em; max-width: 16em; }
+.search-bar { flex: 1; min-width: 12rem; min-height: 44px; display: flex; align-items: center; padding: 6px 12px; border-radius: 10px; background: var(--surface-2); font-weight: 700; }

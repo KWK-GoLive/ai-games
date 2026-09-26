@@ -230,7 +230,7 @@
       app.appendChild(h("section", { class: "card soft stack" },
         h("h2", { text: "How points work" }),
         V ? V.cards(PTS, { cols: 3 }) : h("ul", { class: "rules" }, PTS.map(function (x) { return h("li", {}, h("b", { text: x.title }), " " + x.text); })),
-        h("p", { class: "muted small", text: "6 stages, about 20 minutes. Everything the model does here is really computed in your browser, with the same rules as in the learning game." })));
+        h("p", { class: "muted small", text: "6 stages, about " + (def.minutes || "35–50") + " minutes. Everything the model does here is really computed in your browser, with the same rules as in the learning game." })));
 
       var run = current();
       if (st.official && st.official.complete) {
