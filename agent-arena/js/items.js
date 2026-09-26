@@ -28,14 +28,18 @@
         grade: function (ids) {
           ids = ids || [];
           var have = need.filter(function (id) { return ids.indexOf(id) >= 0; }).length;
-          var extra = ids.filter(function (id) { return need.indexOf(id) < 0; }).length;
+          var extras = ids.filter(function (id) { return need.indexOf(id) < 0; });
+          var extra = extras.length;
+          var bad = desk.cards.filter(function (c) { return c.misleading && extras.indexOf(c.id) >= 0; }).length;
           var over = deskUse(D, desk, ids) > desk.capacity;
-          var frac = over ? 0 : Math.round(100 * (have / need.length) * Math.max(0.5, 1 - 0.25 * extra)) / 100;
+          // a misleading (outdated or contradicting) card costs 25%; a harmless extra costs 10% (it takes space, time and money)
+          var frac = over ? 0 : Math.round(100 * (have / need.length) * Math.max(0.5, 1 - 0.25 * bad - 0.10 * (extra - bad))) / 100;
           var lines = desk.cards.filter(function (c) { return c.need || c.why; }).map(function (c) {
             return (c.need ? "Needed: " : "Not needed: ") + "“" + c.text.slice(0, 60) + (c.text.length > 60 ? "…" : "") + "” " + (c.why || "");
           });
           return { frac: frac, explain: [(have === need.length ? "Every answer was on the desk." : "Missing " + (need.length - have) + " card" + (need.length - have === 1 ? "" : "s") + ": the model would have to guess.") +
-            (extra ? " " + extra + " extra card" + (extra === 1 ? "" : "s") + " (each costs 25% of the item): extra text can crowd out, distract or even contradict." : "") +
+            (bad ? " " + bad + " misleading card" + (bad === 1 ? "" : "s") + " (−25% each): outdated or contradicting text can make the model give the wrong answer." : "") +
+            (extra - bad ? " " + (extra - bad) + " harmless extra card" + (extra - bad === 1 ? "" : "s") + " (−10% each): they take desk space, time and money." : "") +
             (over ? " The desk overflowed." : "")].concat(lines) };
         },
         sample: function (r) { return desk.cards.filter(function () { return r() < 0.4; }).map(function (c) { return c.id; }); }
@@ -78,7 +82,7 @@
   function stage3(D, rng) {
     return shuffle(D.requests, rng).slice(0, 12).map(function (rq) {
       var label = D.tools.filter(function (t) { return t.value === rq.key; })[0].label;
-      return { kind: "mcq", title: "“" + rq.text + "”", limit: 15, key: rq.key, options: D.tools, oneCol: false,
+      return { kind: "mcq", title: "“" + rq.text + "”", limit: 25, key: rq.key, options: D.tools, oneCol: false,
         hint: "Ask: is it plain writing, exact maths, our documents, our data, a file, or something risky?",
         grade: function (a) { return { frac: a === rq.key ? 1 : 0, explain: label + ". " + rq.why }; },
         sample: function (r) { return pick(D.tools, r).value; } };

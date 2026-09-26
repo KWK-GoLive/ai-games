@@ -5,6 +5,7 @@
   "use strict";
   var A = window.ARENA, h = A.h, W = A.w, I = window.AGA.Items, D = window.AGA_DATA;
   var F = window.BTA.Files;
+  var TF = (window.AIG_CONFIG && Number(window.AIG_CONFIG.TIME_FACTOR)) || 1; // the rules show the real timer lengths
 
   function tableEl(rows) {
     return h("div", { class: "table-wrap" }, h("table", {},
@@ -293,6 +294,7 @@
 
   A.start({
     game: "agent",
+    minutes: "40–50",
     kicker: "Game 6 · challenge after Be the Agent",
     title: "Agent Arena",
     intro: [
@@ -302,7 +304,7 @@
     stages: [
       { id: "desk", icon: "🗂️", name: "Desk packer", make: wrap("desk"),
         goal: "The context window is a desk with limited space. Give the model everything it needs, and nothing else.",
-        rules: ["The model can only use what's on the desk. The system prompt is always there.", "Pick cards so that every question can be answered. You can't go over the desk size.", "Missing a needed card loses its share; each extra card costs 25% of the item.", "Tokens are estimated as words × 4/3."],
+        rules: ["The model can only use what's on the desk. The system prompt is always there.", "Pick cards so that every question can be answered. You can't go over the desk size.", "Missing a needed card loses its share. An outdated or misleading card costs 25%; a harmless extra card costs 10% (it takes space, time and money).", "Tokens are estimated as words × 4/3."],
         lesson: "Choosing what goes into the context is a big part of making AI useful: the right facts, the newest version, and not too much. More text is not always better." },
       { id: "search", icon: "🔍", name: "Search sniper", make: wrap("search"),
         goal: "Chatbots often read your files by searching them and putting only the top pieces on the desk. Make the search find the right piece.",
@@ -310,12 +312,12 @@
         lesson: "If the search brings back the wrong piece, the model answers from the wrong piece, and sounds just as sure. Real tools often use smarter search than word counting, but the risk is the same: check the source." },
       { id: "router", icon: "🧭", name: "Tool router", make: wrap("router"),
         goal: "Speed round. For each request, pick what the agent should do.",
-        rules: ["The model itself can write and explain.", "Exact maths → calculator. Our documents → search. Our data → table tool. A real file → file maker.", "Anything permanent, public or sent to other people → stop and ask the human.", "15 seconds each."],
+        rules: ["The model itself can write and explain.", "Exact maths → calculator. Our documents → search. Our data → table tool. A real file → file maker.", "Anything permanent, public or sent to other people → stop and ask the human.", Math.round(25 * TF) + " seconds each."],
         lesson: "The model only writes text. Tools do the exact work, and the app runs them. The riskier the action, the more a human should be in the loop." },
       { id: "data", icon: "📊", name: "Data detective", make: wrap("data"),
         goal: "Answer questions about the rentals data by asking the table tool, as an agent does by writing small programs.",
         rules: ["You can't see the rows: build a question by tapping, run it, and read the result.", "You can add up, count, or find the biggest or smallest, for each branch or bike, and only for some rows (e.g. only where branch is River, only where hours is more than 3).", "Then tap the number or name in your result that answers the question.", "Up to 2 tool calls are free; each extra call costs 10% (never below half marks for a right answer)."],
-        example: "Add up total for each branch\nCount the rows, only where bike is kids\nFind the biggest hours, only where branch is Park",
+        example: "Add up total for each branch\nCount the rows, only where bike is kids\nCount the rows, only where hours is more than 2\nFind the biggest hours, only where branch is Park",
         lesson: "This is how agents answer questions about your data: they write small programs, run them and read the results, and their mistakes show up as errors or odd numbers you can check." },
       { id: "inject", icon: "🕵️", name: "Injection hunter", make: wrap("inject"),
         goal: "Some documents hide orders for the AI (prompt injection). Flag them, and don't flag the innocent ones.",
@@ -323,7 +325,7 @@
         lesson: "An agent reads everything as text, so text in a file can try to steer it. Good apps treat document text as data, not orders, and keep risky actions behind your approval." },
       { id: "boss", icon: "👑", name: "Boss: run the agent", make: wrap("boss"),
         goal: "A whole job, from plan to file. You're the agent and the human in charge.",
-        rules: ["A: put 5 good steps in order.", "B: set each permission: Allow, Ask me or Block.", "C: answer three questions to ask the table tool for e-bike revenue by branch, then run it.", "D: find the wrong number in the model's draft email.", "E: make the real Excel file, then view or download it. Each part is a fifth of the marks. 5 minutes."],
+        rules: ["A: put 5 good steps in order.", "B: set each permission: Allow, Ask me or Block.", "C: answer three questions to ask the table tool for e-bike revenue by branch, then run it.", "D: find the wrong number in the model's draft email.", "E: make the real Excel file, then view or download it. Each part is a fifth of the marks. About " + Math.round(5 * TF * 2) / 2 + " minutes."],
         lesson: "Plan, act, check, deliver, with a human deciding anything risky. That's an agent working well." }
     ],
     finalCard: function () {
@@ -331,7 +333,8 @@
         h("div", { class: "kicker", text: "You've played all six" }),
         h("h2", { text: "Take it with you" }),
         h("p", { text: "Put the right things on the desk, ask for the source, let tools do the exact work, treat documents as data, and stay the boss of anything risky." }),
-        h("div", { class: "row end" }, h("a", { class: "btn", href: "../index.html", text: "All games" })));
+        h("p", { class: "small", text: "For your own work with data, keep the one-page checklist: tool or guess, recompute one total, missing rows, claims beyond the data, privacy, show the formula." }),
+        h("div", { class: "row end" }, h("a", { class: "btn", href: "../index.html", text: "All games" }), h("a", { class: "btn primary", href: "../checklist.html", text: "📋 Checking AI data work" })));
     }
   });
 })();
