@@ -158,30 +158,31 @@
     return shuffle(chosen, rng).map(function (seed) { return writerItem(world, m, seed, 2, 90, rng); });
   }
 
-  /* ================= Stage 3: Dice master (temperature) ================= */
-  var TEMPS = [0, 0.5, 1, 2];
+  /* ================= Stage 3: Dice master (temperature) =================
+   * About ideas, not arithmetic (v4): which chart is which temperature, what temperature 0 allows,
+   * and which way a word's chance moves when you turn the dial. The bars are computed by the real model rule. */
   function stage3(D, rng) {
     var items = [];
-    var kinds = shuffle(["pct", "pct", "pct", "zero", "dir"], rng);
-    var temps = shuffle([0.5, 1, 2, 2, 0.5, 1], rng);
-    kinds.forEach(function (kind, idx) {
+    var kinds = shuffle(["chart", "chart", "zero", "dir", "down"], rng);
+    var chartTemps = shuffle([2, 0.5], rng);
+    kinds.forEach(function (kind) {
       var counts = pick(D.diceCounts, rng);
       var cx = pick(D.diceContexts, rng);
       var words = shuffle(cx.words, rng).slice(0, counts.length);
       var dist = counts.map(function (c, i) { return { word: words[i], count: c }; });
       var table = { ctx: cx.ctx, dist: dist };
       var pctAt = function (T, w) { var d = M.applyTemperature(dist, T); return Math.round(100 * d.filter(function (x) { return x.word === w; })[0].p); };
+      var bars = function (T) { return dist.map(function (d) { return { word: d.word, pct: pctAt(T, d.word) }; }); };
       var all = function (T) { return dist.map(function (d) { return d.word + " " + pctAt(T, d.word) + "%"; }).join(", "); };
-      if (kind === "pct") {
-        var T = temps[idx], w = pick(words, rng), key = pctAt(T, w);
-        var opts = uniq([key].concat(TEMPS.map(function (t) { return pctAt(t, w); }), [Math.round(100 / counts.length), 50, 25]));
-        opts = [key].concat(shuffle(opts.slice(1), rng).slice(0, 3));
-        items.push({ kind: "mcq", dice: table, limit: 50, key: key,
-          title: "At temperature " + T + ", what % does " + q(w) + " get?",
-          hint: T === 2 ? "Temperature 2: take the square root of each count, then work out the %." : T === 0.5 ? "Temperature 0.5: square each count, then work out the %." : "Temperature 1: the plain counts. % = count \u00f7 total.",
-          options: shuffle(opts, rng).map(function (v) { return { value: v, label: v + "%" }; }),
-          grade: function (a) { return { frac: Number(a) === key ? 1 : 0, explain: "At temperature " + T + ": " + all(T) + ". (At 0: " + all(0) + "; at 1: " + all(1) + ".)" }; },
-          sample: function (r) { return pick(opts, r); } });
+      if (kind === "chart") {
+        var T = chartTemps.pop();
+        var opts = shuffle([0.5, 1, 2], rng).map(function (t, i) { return { value: String(t), letter: "ABC"[i], label: "Chart " + "ABC"[i], bars: bars(t) }; });
+        items.push({ kind: "mcq", dice: table, limit: 50, key: String(T), charts: true,
+          title: "Which chart shows temperature " + T + "?",
+          hint: T === 2 ? "A high temperature flattens the chances: the bars become more even." : "A low temperature sharpens the chances: the top bar grows, the others shrink.",
+          options: opts,
+          grade: function (a) { return { frac: String(a) === String(T) ? 1 : 0, explain: "Temperature " + T + ": " + all(T) + ". Temperature 1 is the plain counts: " + all(1) + ". Low temperature sharpens (the top word grows); high temperature flattens (the bars even out)." }; },
+          sample: function (r) { return pick(opts, r).value; } });
       } else if (kind === "zero") {
         var o = [
           { value: "top", label: "Only " + q(dist[0].word) },
@@ -195,14 +196,16 @@
           grade: function (a) { return { frac: a === "top" ? 1 : 0, explain: "Temperature 0 means no dice: the top word gets 100% every time, so only " + q(dist[0].word) + " can ever appear. The others can only show up at a temperature above 0." }; },
           sample: function (r) { return pick(o, r).value; } });
       } else {
-        var w2 = pick(words, rng), p1 = pctAt(1, w2), p2 = pctAt(2, w2);
+        var up = kind === "dir";
+        var w2 = up ? (rng() < 0.5 ? dist[0].word : dist[dist.length - 1].word) : dist[0].word; // top or bottom word only: the taught rule decides it
+        var from = 1, to = up ? 2 : 0.5, p1 = pctAt(from, w2), p2 = pctAt(to, w2);
         var dirKey = p2 > p1 ? "more" : p2 < p1 ? "less" : "same";
         var o2 = [{ value: "more", label: "It gets more likely" }, { value: "less", label: "It gets less likely" }, { value: "same", label: "No change" }, { value: "zero", label: "It can no longer appear" }];
         items.push({ kind: "mcq", dice: table, limit: 45, key: dirKey,
-          title: "You turn the temperature up from 1 to 2. What happens to " + q(w2) + "?",
-          hint: "A higher temperature flattens the chances: big ones shrink, small ones grow.",
+          title: "You turn the temperature " + (up ? "up" : "down") + " from 1 to " + to + ". What happens to " + q(w2) + (up ? "" : ", the top word") + "?",
+          hint: up ? "A higher temperature flattens the chances: the bars move toward equal shares, so the biggest shrinks and the smallest grows." : "A lower temperature sharpens the chances: the top word grows.",
           options: o2,
-          grade: function (a) { return { frac: a === dirKey ? 1 : 0, explain: q(w2) + " goes from " + p1 + "% (temperature 1) to " + p2 + "% (temperature 2). Higher temperature flattens the chances: the top word loses share and rare words gain." }; },
+          grade: function (a) { return { frac: a === dirKey ? 1 : 0, explain: q(w2) + " goes from " + p1 + "% (temperature 1) to " + p2 + "% (temperature " + to + "). " + (up ? "Higher temperature flattens the chances: the top word loses share and rare words gain." : "Lower temperature sharpens the chances: the top word gains, the others lose.") }; },
           sample: function (r) { return pick(o2, r).value; } });
       }
     });

@@ -36,10 +36,15 @@
     if (it.dice) {
       box.appendChild(h("div", { class: "card soft stack" },
         h("div", { text: "Training text, after \u201c" + it.dice.ctx + "\u201d, the model counted:" }),
-        h("div", { class: "counts" }, it.dice.dist.map(function (d) { return h("div", { class: "c" }, h("b", { text: d.word }), d.count + " times"); })),
-        h("div", { class: "small muted", text: "T 0: top word only \u00b7 T 0.5: square the counts \u00b7 T 1: plain counts \u00b7 T 2: square roots. Then % = share of the total." })));
+        h("div", { class: "counts" }, it.dice.dist.map(function (d) { return h("div", { class: "c" }, h("b", { text: d.word }), d.count + (d.count === 1 ? " time" : " times")); })),
+        h("div", { class: "small muted", text: "Temperature 0: the top word only \u00b7 low temperature: the top word gets even more likely \u00b7 1: the plain counts \u00b7 high temperature: the chances even out." })));
     }
-    var c = W.choices(it.options, function (v) { api.submit(v); });
+    // Chart questions: each option is a little bar chart (the model's real chances at that temperature).
+    var options = it.charts ? it.options.map(function (o) {
+      return { value: o.value, label: h("span", { class: "mini-chart" }, h("b", { class: "mc-letter", text: "Chart " + o.letter }),
+        o.bars.map(function (b) { return h("span", { class: "mc-row" }, h("span", { class: "mc-word", text: b.word }), h("span", { class: "mc-bar" }, h("i", { style: "width:" + b.pct + "%" })), h("span", { class: "mc-pct", text: b.pct + "%" })); })) };
+    }) : it.options;
+    var c = W.choices(options, function (v) { api.submit(v); });
     box.appendChild(c.el);
     return { collect: c.collect, reveal: function () { c.reveal(it.key); } };
   }
@@ -54,8 +59,8 @@
   function drawTiles(it, box, api) {
     box.appendChild(worldText(it.world));
     box.appendChild(h("p", { class: "small muted", text: it.k === 1
-      ? "Temperature 0, 1-word memory: after each word, write the word that most often follows it."
-      : "Temperature 0, 2-word memory: look up the last two words together; if that pair never appears, use only the last word." }));
+      ? "Temperature 0, 1-word window: after each word, write the word that most often follows it."
+      : "Temperature 0, 2-word window: look up the last two words together; if that pair never appears, use only the last word." }));
     var b = W.tileBuilder({ seed: it.seed.map(M.displayWord), tiles: it.tiles, max: it.max, onSubmit: function (words) { api.submit(words); } });
     box.appendChild(b.el);
     return { collect: b.collect, reveal: function () { b.reveal(it.key); } };
@@ -111,10 +116,11 @@
 
   A.start({
     game: "llm",
+    minutes: "35–45",
     kicker: "Game 3 \u00b7 challenge after Be the LLM",
     title: "LLM Arena",
     intro: [
-      "You learned how a language model works. Now be one, against the clock. Each stage gives you a NEW little training text, so you can't rely on memory: you have to think like the model.",
+      "You learned how a language model works. Now be one, against the clock. Each stage gives you a NEW little training text, so you can't rely on what you remember: you have to think like the model.",
       "The answers are checked by a real toy model running in your browser, the same kind you built in Be the LLM."
     ],
     stages: [
@@ -125,24 +131,24 @@
         lesson: "Everything this model \u201cknows\u201d is a table of counts from its training text. Real models learn far richer patterns, but they too are trained on one task: predict the next piece of text." },
       { id: "greedy", icon: "✍️", name: "Greedy writer", make: wrap(stageFn("greedy")),
         goal: "Write the whole continuation the model produces at temperature 0, one word at a time.",
-        rules: ["The model only remembers the LAST word.", "At each step it writes the word that most often follows it. Ties: reading from the top, the one that comes right after it first wins.", "It stops when it writes [end], or after 8 pieces.", "Part marks: you score the share of pieces you got right before your first slip."],
+        rules: ["The model only sees the LAST word (a 1-word window).", "At each step it writes the word that most often follows it. Ties: reading from the top, the one that comes right after it first wins.", "It stops when it writes [end], or after 8 pieces.", "Part marks: you score the share of pieces you got right before your first slip."],
         example: "Seed: \u201cthe\u201d\nthe \u2192 robot \u2192 fixed \u2192 the \u2192 robot \u2192 \u2026 (a loop!)",
-        lesson: "With a tiny memory and no dice, the model can go round in circles. Temperature 0 always gives the same text; real chatbots add some randomness and use a far bigger window, which is why they rarely loop like this." },
+        lesson: "With a tiny window and no dice, the model can go round in circles. Temperature 0 always gives the same text; real chatbots add some randomness and use a far bigger window, which is why they rarely loop like this." },
       { id: "dice", icon: "🎲", name: "Dice master", make: wrap(stageFn("dice")),
-        goal: "Temperature decides how the model rolls its dice. Work out the chances.",
-        rules: ["Temperature 1: plain counts. % = count \u00f7 total.", "Temperature 2: take the square root of each count first (flatter).", "Temperature 0.5: square each count first (sharper).", "Temperature 0: no dice, the top word gets 100%."],
-        example: "Counts: cat 9, dog 4, fish 1\nT 1: 9/14 = 64%   T 2: \u221a9=3, \u221a4=2, \u221a1=1 \u2192 cat 3/6 = 50%",
-        lesson: "Low temperature makes the model predictable; high temperature makes it more varied (and more likely to pick odd words). The counts never change, only how the dice are weighted." },
+        goal: "Temperature decides how the model rolls its dice. Read the charts and predict what the dial does.",
+        rules: ["Temperature 1: the plain counts. % = count \u00f7 total.", "Higher temperature (like 2) flattens the chances: the bars even out.", "Lower temperature (like 0.5) sharpens them: the top word grows.", "Temperature 0: no dice, the top word gets 100%.", "No maths needed: look at the shape of the bars."],
+        example: "Counts: cat 9, dog 4, fish 1\nTemperature 0.5: cat 83% \u00b7 dog 16% \u00b7 fish 1% (sharper)\nTemperature 1: cat 64% \u00b7 dog 29% \u00b7 fish 7% (the plain counts)\nTemperature 2: cat 50% \u00b7 dog 33% \u00b7 fish 17% (flatter)",
+        lesson: "Low temperature makes the model predictable; high temperature makes it more varied (and more likely to pick odd words). The counts never change, only how the dice are weighted. The exact formula doesn't matter: low temperature sharpens, high temperature flattens." },
       { id: "keyhole", icon: "🔑", name: "Keyhole", make: wrap(stageFn("keyhole")),
         goal: "The context window: how many of the last words the model can see. Change the window, change the answer.",
         rules: ["The model sees ONLY the highlighted last words. The crossed-out words don't exist for it.", "Find those exact words, in order, in the training text, and see what follows them.", "If they never appear together, this model has no data.", "Ties: reading the text from the top, the word that comes right after them first wins."],
         lesson: "A wider window gives the model more to go on, but also more chances that it has never seen that exact wording. Real models learn patterns, so they can still guess well there; they also see thousands of words at once." },
       { id: "chat", icon: "💬", name: "Chat brain", make: wrap(stageFn("chat")),
         goal: "A chatbot answers by continuing \u201cQ: \u2026 A:\u201d. Predict its answer, then judge whether the answer is backed by what it was taught.",
-        rules: ["The model was trained on the example chats shown. It remembers up to 8 words back.", "For a question it has seen, it copies the answer. For a new one, it finds the longest ending it recognises (like \u201cthe pool open A:\u201d) and continues from there.", "Ties: if two answers could follow, the one higher up in the list of chats wins.", "Supported = the chats contain the same question (maybe worded differently, same question word) with that answer.", "Made up = it borrowed an answer from a different question.", "Half marks for each part."],
+        rules: ["The model was trained on the example chats shown. It sees up to 8 words back (an 8-word window).", "For a question it has seen, it copies the answer. For a new one, it finds the longest ending it recognises (like \u201cthe pool open A:\u201d) and continues from there.", "Ties: if two answers could follow, the one higher up in the list of chats wins.", "Supported = the chats contain the same question (maybe worded differently, same question word) with that answer.", "Made up = it borrowed an answer from a different question.", "Half marks for each part."],
         lesson: "This is where made-up answers (hallucinations) come from: the model always continues the text with something that looks like an answer, and it sounds just as sure either way." },
       { id: "boss", icon: "👑", name: "Boss: be the model", make: wrap(stageFn("boss")),
-        goal: "Everything at once. Two-word memory, backing off to one word when needed.",
+        goal: "Everything at once. A two-word window, backing off to one word when needed.",
         rules: ["Look up the last TWO words together and write the word that most often follows.", "If that pair never appears in the text, back off: use only the last word.", "Ties: reading the text from the top, the word that comes right after them first wins. Stop at [end], or after 8 pieces.", "Part marks for the right pieces before your first slip."],
         example: "\u201cthe boat\u201d never appears \u2192 use \u201cboat\u201d \u2192 is\nthen \u201cboat is\u201d \u2192 on \u2026",
         lesson: "You just did by hand what a language model does billions of times: look at the context, pick the next piece, add it, repeat." }
