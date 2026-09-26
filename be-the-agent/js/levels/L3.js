@@ -95,22 +95,36 @@
             box.appendChild(h("div", { class: "row" }, w.onceBtn("Paste the result onto the desk", function () {
               box.appendChild(h("div", { class: "chat" }, w.bubble("ai", "Total sales in sales.csv were " + w.fmt(r.value) + " THB.")));
               points += 10;
-              var inp = h("input", { class: "text-input", type: "text", value: "TOTAL total BY item", "aria-label": "table tool command" });
               var out = h("div", { class: "stack" });
-              var runBtn = h("button", { class: "btn", type: "button", text: "Run" });
-              function run() {
+              function show(cmd, res) {
                 ui.clear(out);
-                var res = E.runTable(D.salesCsv, inp.value);
+                out.appendChild(w.toolCall("table", "sales.csv: " + cmd));
                 if (!res.ok) out.appendChild(w.toolResult(res.error, false));
                 else if (res.table) out.appendChild(w.toolResult(w.tableEl(res.table)));
                 else out.appendChild(w.toolResult(res.text));
               }
-              runBtn.addEventListener("click", run);
-              inp.addEventListener("keydown", function (e) { if (e.key === "Enter") run(); });
-              box.appendChild(h("div", { class: "card soft stack" },
-                h("b", { text: "Try the table tool yourself" }),
-                h("p", { class: "small muted", text: "Commands: SHOW 5 ROWS · COUNT ROWS · TOTAL qty · TOTAL total BY item · TOTAL qty BY date. Try a column that doesn't exist, like TOTAL sales, to see an error." }),
-                h("div", { class: "row" }, h("div", { style: "flex:1;min-width:180px" }, inp), runBtn), out));
+              var tryBox;
+              if (window.QB && window.QB.create) {
+                var qb = window.QB.create({ csv: D.salesCsv, parse: E.parseCsv, run: function (c) { return E.runTable(D.salesCsv, c); },
+                  actions: ["show", "count", "total"], where: false, file: "sales.csv", onRun: show });
+                tryBox = h("div", { class: "card soft stack" },
+                  h("b", { text: "Try the table tool yourself" }),
+                  h("p", { class: "small muted", text: "Tap to build a question, e.g. “Add up total for each item” or “Add up qty for each date”. Underneath you'll see the command the model would write for the tool." }),
+                  qb.el,
+                  h("div", { class: "row" }, (function () {
+                    var bad = h("button", { class: "btn", type: "button", text: "❌ Try a column that doesn't exist: “sales”" });
+                    bad.addEventListener("click", function () { show("TOTAL sales", E.runTable(D.salesCsv, "TOTAL sales")); });
+                    return bad;
+                  })(), h("span", { class: "small muted", text: "to see what the tool does with a wrong request" })),
+                  out);
+              } else {
+                var inp = h("input", { class: "text-input", type: "text", value: "TOTAL total BY item", "aria-label": "table tool command" });
+                var runBtn = h("button", { class: "btn", type: "button", text: "Run" });
+                runBtn.addEventListener("click", function () { show(inp.value, E.runTable(D.salesCsv, inp.value)); });
+                tryBox = h("div", { class: "card soft stack" }, h("b", { text: "Try the table tool yourself" }),
+                  h("div", { class: "row" }, h("div", { style: "flex:1;min-width:180px" }, inp), runBtn), out);
+              }
+              box.appendChild(tryBox);
               searchStep();
             })));
           })));

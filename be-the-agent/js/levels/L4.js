@@ -8,7 +8,7 @@
     id: "L4", num: 4,
     name: "The agent loop",
     desc: "Watch an agent turn a data file into a real Excel file and a Word memo.",
-    goal: "Give an AI agent a whole job, not just a question. It works in a loop: plan, do one step with a tool, look at the result, fix mistakes, repeat. At the end you download the real files it made.",
+    goal: "Give an AI agent a whole job, not just a question. It works in a loop: plan, do one step with a tool, look at the result, fix mistakes, repeat. At the end you can view the real files it made on screen, or download them.",
     intro: [
       { title: "An agent is a model + a harness + tools, working in a loop.", text: "Instead of answering once, it takes a step, reads the tool's result from its desk, and decides the next step, until the job is done." },
       { title: "The loop:", text: "", ex: "PLAN → ACT (use a tool) → CHECK the result → FIX if needed → … → DONE" },
@@ -92,7 +92,7 @@
         var s = section("model", "Step 4 · Fix the mistake", "You are the model again. The error message is now on your desk. What do you write next?");
         s.appendChild(ui.mcq({
           q: "Your next move:",
-          options: ["Run exactly the same request again", "TOTAL total BY item (use the column that really exists)", "Give up and estimate the numbers"],
+          options: ["Run exactly the same request again", "Ask again with the column that really exists: add up total for each item (TOTAL total BY item)", "Give up and estimate the numbers"],
           answer: 1,
           explain: "Read the error, fix the request. The column is called “total”, not “sales”. Agents recover from errors like this because the error text lands on their desk."
         }, function (i, ok) {
@@ -119,6 +119,15 @@
         })));
       }
 
+      /* View on screen (phones, iPads) or download the real file */
+      function fileBox(name, made, mime, note) {
+        var dl = function () { F.download(made.bytes, name, mime); };
+        if (window.VIS) return window.VIS.fileActions({ name: name, spec: made.spec, download: dl, note: note });
+        var b = h("button", { class: "btn", type: "button", text: "⬇ Download " + name });
+        b.addEventListener("click", dl);
+        return h("div", { class: "row" }, b, h("span", { class: "small muted", text: note }));
+      }
+
       /* ---- 6. Make the Excel file ---- */
       function buildXlsx() {
         var rows = [["Item", "Sales (THB)", "Share of sales"]];
@@ -126,21 +135,20 @@
         rows.push(["Total", { f: "SUM(B2:B" + (byItem.groups.length + 1) + ")", v: grand }, { pct: 1 }]);
         var csv = E.parseCsv(D.salesCsv);
         var data = [csv.cols].concat(csv.rows.map(function (r) { return csv.cols.map(function (c) { return r[c]; }); }));
-        return F.xlsx([
+        var sheets = [
           { name: "Summary", rows: rows, widths: [16, 14, 16] },
           { name: "Data", rows: data, widths: [12, 12, 6, 7, 8] }
-        ]);
+        ];
+        return { bytes: F.xlsx(sheets), spec: { type: "xlsx", sheets: sheets } };
       }
       function step6() {
         phase("Act");
         var s = section("harness", "Step 6 · Make the Excel file", "The model writes a request to the file-making tool, describing what goes in the file. Run it.");
         s.appendChild(w.toolCall("create_excel", "sales_summary.xlsx: sheet Summary = sales by item + share + total; sheet Data = all rows"));
         s.appendChild(h("div", { class: "row" }, w.onceBtn("Run the tool", function () {
-          var bytes = buildXlsx();
+          var made = buildXlsx(), bytes = made.bytes;
           s.appendChild(w.toolResult("Created sales_summary.xlsx (" + w.fmt(bytes.length) + " bytes, 2 sheets)."));
-          var dl = h("button", { class: "btn", type: "button", text: "⬇ Download sales_summary.xlsx" });
-          dl.addEventListener("click", function () { F.download(bytes, "sales_summary.xlsx", F.XLSX_MIME); });
-          s.appendChild(h("div", { class: "row" }, dl, h("span", { class: "small muted", text: "It's a real Excel file. Open it and look at both sheets." })));
+          s.appendChild(fileBox("sales_summary.xlsx", made, F.XLSX_MIME, "It's a real Excel file. View it here, or download it and look at both sheets."));
           points += 10;
           s.appendChild(h("div", { class: "row end" }, w.onceBtn("Continue", step7)));
         })));
@@ -150,7 +158,7 @@
       function step7() {
         phase("Check");
         var wrongTotal = grand + 100;
-        var s = section("human", "Step 7 · Check the memo draft", "The model wrote this draft by itself, word by word. Compare it with the tool results above. One number is wrong. Click it.");
+        var s = section("human", "Step 7 · Check the memo draft", "The model wrote this draft by itself, word by word. Compare it with the tool results above. One number is wrong. Tap it.");
         var claims = [
           { text: "Total sales from 1 to 10 August were " + w.fmt(wrongTotal) + " THB.", ok: false },
           { text: top[0] + " was the best seller with " + w.fmt(top[1]) + " THB.", ok: true },
@@ -179,7 +187,7 @@
       function buildDocx() {
         var table = [["Item", "Sales (THB)"]].concat(byItem.groups.map(function (g) { return [g[0], w.fmt(g[1])]; }));
         table.push(["Total", w.fmt(grand)]);
-        return F.docx([
+        var blocks = [
           { h1: "Moonbean Café: sales summary, 1–10 August 2026" },
           { p: "Total sales from 1 to 10 August were " + w.fmt(grand) + " THB, from " + nRows + " sales records." },
           { h2: "Highlights" },
@@ -188,18 +196,17 @@
           { h2: "Sales by item" },
           { table: table },
           { p: "Prepared by an AI agent (a demo in the game “Be the Agent”). All numbers were calculated by a tool from sales.csv and checked by a person. Moonbean Café is a made-up business." }
-        ]);
+        ];
+        return { bytes: F.docx(blocks), spec: { type: "docx", blocks: blocks } };
       }
       function step8() {
         phase("Act");
         var s = section("harness", "Step 8 · Make the Word memo", "The model corrects the total (copying it from the tool result this time) and asks the file tool for the memo. Run it.");
         s.appendChild(w.toolCall("create_word", "memo.docx: title, total " + w.fmt(grand) + " THB, 2 highlights, table of sales by item"));
         s.appendChild(h("div", { class: "row" }, w.onceBtn("Run the tool", function () {
-          var bytes = buildDocx();
+          var made = buildDocx(), bytes = made.bytes;
           s.appendChild(w.toolResult("Created memo.docx (" + w.fmt(bytes.length) + " bytes)."));
-          var dl = h("button", { class: "btn", type: "button", text: "⬇ Download memo.docx" });
-          dl.addEventListener("click", function () { F.download(bytes, "memo.docx", F.DOCX_MIME); });
-          s.appendChild(h("div", { class: "row" }, dl, h("span", { class: "small muted", text: "A real Word file. Check the total in it yourself." })));
+          s.appendChild(fileBox("memo.docx", made, F.DOCX_MIME, "A real Word file. Check the total in it yourself."));
           points += 10;
           phase("Done");
           s.appendChild(h("div", { class: "chat" }, w.bubble("ai", "Done. I made sales_summary.xlsx (sales by item, plus all the data) and memo.docx for the owner. Total sales: " + w.fmt(grand) + " THB; " + top[0] + " sold best. Please check a few numbers before you share them.")));

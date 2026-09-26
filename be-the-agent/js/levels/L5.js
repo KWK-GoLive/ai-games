@@ -36,7 +36,7 @@
       var youSee = h("div", { class: "card soft stack" }, h("b", { text: "What you see in your inbox" }));
       D.emails.forEach(function (m) { youSee.appendChild(h("p", { class: "small", style: "margin:0" }, h("b", { text: m.from + ": " }), m.text)); });
       var modelSees = h("div", { class: "card soft stack" }, h("b", { text: "What the model sees on its desk" }),
-        h("p", { class: "small muted", style: "margin:0", text: "All the text, including anything hidden from you (like white text on a white background). One line is an instruction planted for the AI. Click it." }));
+        h("p", { class: "small muted", style: "margin:0", text: "All the text, including anything hidden from you (like white text on a white background). One line is an instruction planted for the AI. Tap it." }));
       var lines = [];
       D.emails.forEach(function (m) {
         lines.push({ text: m.from + ": " + m.text, planted: false });
@@ -90,7 +90,7 @@
           h("div", { class: "row" }, w.roleTag("human")),
           h("div", { class: "kicker", text: "Round 2 of 2 · A web page found by search" }),
           h("div", { class: "chat" }, w.bubble("you", "Search the web for tips on running a small café.")),
-          h("p", { text: "The search tool pasted this page onto the desk (" + D.webPage.title + "). This is all its text, including parts a person wouldn't notice. Click the planted instruction." }));
+          h("p", { text: "The search tool pasted this page onto the desk (" + D.webPage.title + "). This is all its text, including parts a person wouldn't notice. Tap the planted instruction." }));
         var fb = h("p", { class: "feedback", "aria-live": "polite" });
         var tried = false;
         var btns = D.webPage.lines.map(function (l, i) {
