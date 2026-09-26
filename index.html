@@ -23,6 +23,13 @@
       <p>Play them in order. In each learning game you do the AI's job yourself. Each arena then tests you against the clock, and your class can compete on a live scoreboard.</p>
     </section>
 
+    <section class="card stack" id="signin" aria-labelledby="signin-h">
+      <div class="kicker">Sign in once</div>
+      <h2 id="signin-h">Who's playing?</h2>
+      <p class="muted small">Used by the two challenge games (arenas) for the class scoreboard. Use a nickname, not your real name or student ID.</p>
+      <div id="signin-body"></div>
+    </section>
+
     <ol class="games" id="games">
       <li><a class="game" href="be-the-llm/index.html" data-id="llm">
         <span class="n" aria-hidden="true">1</span>
@@ -51,7 +58,49 @@
 
   <footer><p>Made for teaching. Everything runs in your browser; the arenas send only a nickname, optional team, class code and scores to the class scoreboard.</p></footer>
 
+  <script src="config.js"></script>
+  <script src="shared/arena.js"></script>
   <script>
+  /* Front-page sign-in: saved on this device and picked up by both arenas. */
+  (function () {
+    var A = window.ARENA, h = A.h, body = document.getElementById("signin-body");
+    function summary() {
+      var p = A.getProfile();
+      A.clear(body);
+      var chg = h("button", { class: "btn ghost", type: "button", text: "Change" });
+      chg.addEventListener("click", form);
+      body.appendChild(h("div", { class: "row" },
+        h("p", { style: "flex:1;margin:0" }, "\u2713 Playing as ", h("b", { text: p.nickname }),
+          p.team ? " \u00b7 team " + p.team : "", A.boardEnabled ? " \u00b7 class " + p.classCode : ""),
+        chg));
+    }
+    function form() {
+      var p = A.getProfile();
+      A.clear(body);
+      var nick = h("input", { class: "text-input", id: "p-nick", maxlength: "16", autocomplete: "off", value: p.nickname });
+      var team = h("input", { class: "text-input", id: "p-team", maxlength: "20", autocomplete: "off", value: p.team });
+      var code = h("input", { class: "text-input", id: "p-class", maxlength: "20", autocomplete: "off", value: p.classCode });
+      var msg = h("p", { class: "feedback", "aria-live": "polite" });
+      var f = h("form", { class: "stack", novalidate: true },
+        h("label", { class: "field", for: "p-nick" }, "Nickname", nick),
+        h("label", { class: "field", for: "p-team" }, "Team name ", h("span", { class: "muted", text: "(optional; teammates type the same name)" }), team),
+        A.boardEnabled ? h("label", { class: "field", for: "p-class" }, "Class code ", h("span", { class: "muted", text: "(from your teacher)" }), code) : null,
+        msg,
+        h("div", { class: "row end" }, h("button", { class: "btn primary", type: "submit", text: "Save" })));
+      f.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var n = A.cleanNick(nick.value), c = A.cleanClass(code.value);
+        if (!n) { msg.className = "feedback bad"; msg.textContent = "Please type a nickname (letters or numbers)."; nick.focus(); return; }
+        if (A.boardEnabled && !c) { msg.className = "feedback bad"; msg.textContent = "Please type the class code your teacher gave you."; code.focus(); return; }
+        A.setProfile({ nickname: n, team: A.cleanTeam(team.value), classCode: c });
+        summary();
+      });
+      body.appendChild(f);
+    }
+    var p = A.getProfile();
+    if (p.nickname && (!A.boardEnabled || p.classCode)) summary(); else form();
+  })();
+
   (function () {
     var done = {};
     try { done = JSON.parse(localStorage.getItem("ai-games-done") || "{}") || {}; } catch (e) { /* storage blocked */ }
