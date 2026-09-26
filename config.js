@@ -9,6 +9,6 @@ window.AIG_CONFIG = {
   // How often the projected scoreboard refreshes, in seconds. Raise it for very large classes.
   BOARD_REFRESH_SECONDS: 5,
 
-  // Multiply every item's timer, e.g. 1.5 gives everyone 50% more time. 1 = normal.
-  TIME_FACTOR: 1
+  // Multiply every item's timer. 1.5 (the default for this class) gives everyone 50% more time for reading; 1 = the original timers.
+  TIME_FACTOR: 1.5
 };

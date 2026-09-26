@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light only">
+  <title>Checking AI data work</title>
+  <meta name="description" content="A one-page checklist for checking what an AI chatbot or agent did with your data: numbers, missing rows, claims and privacy.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231d7a46'/%3E%3Cpath d='M9 16l5 5 9-11' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="shared/arena.css">
+  <link rel="stylesheet" href="shared/visual.css">
+  <style>
+    .check-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; counter-reset: c; }
+    .check-list li { display: grid; grid-template-columns: 2.6rem 1fr; gap: 10px; align-items: start; border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; background: var(--surface); }
+    .check-list .n { width: 2.4rem; height: 2.4rem; border-radius: 50%; background: var(--good-soft); color: var(--good); display: inline-flex; align-items: center; justify-content: center; font-size: 1.3rem; }
+    .check-list b { display: block; line-height: 1.3; }
+    .check-list p { margin: 4px 0 0; }
+    .check-list .from { font-size: .82rem; color: var(--ink-3); margin-top: 4px; }
+    .box { width: 1.1rem; height: 1.1rem; border: 2px solid var(--ink-3); border-radius: 4px; display: inline-block; vertical-align: -2px; margin-right: 6px; }
+    @media print {
+      .topbar, footer, .no-print { display: none !important; }
+      body { font-size: 12pt; }
+      .card { box-shadow: none; border: 0; padding: 0; }
+      .check-list li { break-inside: avoid; box-shadow: none; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <span class="brand">AI <span>games</span></span>
+    <span class="spacer"></span>
+    <a class="pill" href="index.html">&larr; All games</a>
+  </header>
+  <main>
+    <section class="card stack">
+      <div class="kicker">Take it with you</div>
+      <h1>Checking AI data work</h1>
+      <p class="goal-line">Use this whenever a chatbot or AI agent works with your data: a spreadsheet, a report, a summary of numbers. Every check comes from something you saw happen in the games.</p>
+      <ol class="check-list">
+        <li><span class="n" aria-hidden="true">🧮</span><div><b><span class="box" aria-hidden="true"></span>Did a tool or program compute the numbers?</b>
+          <p>A language model writes numbers as likely-looking words. Trust a number more when you can see it came from a calculator, a formula or code.</p>
+          <div class="from">You saw it: Be the LLM, Level 7 (17 + 5) · Be the Agent, Level 3</div></div></li>
+        <li><span class="n" aria-hidden="true">✅</span><div><b><span class="box" aria-hidden="true"></span>Recompute one total yourself.</b>
+          <p>Pick one important number and check it in the real file, for example with a SUM in Excel. A wrong total can look completely normal.</p>
+          <div class="from">You saw it: Be the Agent, Level 4 (the memo total)</div></div></li>
+        <li><span class="n" aria-hidden="true">🕳️</span><div><b><span class="box" aria-hidden="true"></span>How were missing or odd rows handled?</b>
+          <p>Ask: were any rows empty, strange or left out? Did the totals include them? Read what the AI says about them against the real row.</p>
+          <div class="from">You saw it: Watch a Real Agent (the July 5 row)</div></div></li>
+        <li><span class="n" aria-hidden="true">🔍</span><div><b><span class="box" aria-hidden="true"></span>Does any claim go beyond the columns you have?</b>
+          <p>Profit needs costs. Causes need more than a table of sales. Trends need enough time. If the data can't show it, the sentence shouldn't say it.</p>
+          <div class="from">You saw it: Watch a Real Agent ("margin" with no costs)</div></div></li>
+        <li><span class="n" aria-hidden="true">🔒</span><div><b><span class="box" aria-hidden="true"></span>Did personal or confidential data stay in approved tools?</b>
+          <p>What you paste or upload is sent to the company running the chatbot. Use the tools your organisation approves, and share only what the task needs.</p>
+          <div class="from">You saw it: Be the Agent, Level 6</div></div></li>
+        <li><span class="n" aria-hidden="true">📝</span><div><b><span class="box" aria-hidden="true"></span>Ask it to show its formula, code or source.</b>
+          <p>"Show me the formula you used" or "quote the sentence from the file". Then check that formula or quote yourself.</p>
+          <div class="from">You saw it: Be the Agent, Levels 2 and 3</div></div></li>
+      </ol>
+      <div class="row end no-print">
+        <button class="btn primary" type="button" id="printBtn">🖨️ Print or save as PDF</button>
+      </div>
+    </section>
+  </main>
+  <footer><p>From the AI games for "AI for Data Work". Everything on this page is general advice; your organisation's rules come first.</p></footer>
+  <script>
+    document.getElementById("printBtn").addEventListener("click", function () { window.print(); });
+  </script>
+</body>
+</html>

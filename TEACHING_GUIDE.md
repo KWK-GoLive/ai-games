@@ -6,12 +6,12 @@ The site runs in this order: **Guess the Chatbot → Be the LLM → LLM Arena �
 
 | Session | Activity | Time |
 |---|---|---|
-| 1 | Guess the Chatbot (warm-up; good on the projector with a hand vote per guess) | 5–10 min |
-| 1 | Be the LLM (solo or projected), then debrief | 35–45 min |
-| 1 or 2 | LLM Arena as a class competition, board projected | about 20 min, plus 10 to discuss |
-| 2 or 3 | Watch a Real Agent (warm-up) | 6–10 min |
-| 2 or 3 | Be the Agent, then debrief | 35–45 min |
-| 2 or 3 | Agent Arena as a class competition | about 20 min, plus 10 to discuss |
+| 1 | Guess the Chatbot (warm-up; good on the projector with a hand vote per guess) | 8–12 min |
+| 1 | Be the LLM (solo or projected), then debrief. Can be split: Levels 1–4, then 5–7 | 40–50 min, plus 10 to discuss |
+| 1 or 2 | LLM Arena as a class competition, board projected | 35–45 min, plus 10 to discuss |
+| 2 or 3 | Watch a Real Agent (warm-up) | 10–15 min |
+| 2 or 3 | Be the Agent, then debrief. Can be split: Levels 1–3, then 4–6 | 45–55 min, plus 10 to discuss |
+| 2 or 3 | Agent Arena as a class competition | 40–50 min, plus 10 to discuss |
 
 All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` in `config.js`.
 
@@ -19,7 +19,8 @@ All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` 
 
 - They are meant to raise questions, not answer them. Each ends with 3–4 "mysteries" and the level of the next game that answers each one. Collect the class's guesses before the learning game, and come back to them in the debrief.
 - **Honesty:** the chatbot replies and the agent run are real recordings (see README, "The two warm-ups"). They come from one model on one day; another chatbot, or the same one tomorrow, may answer differently. That is itself a good discussion point.
-- In the agent warm-up, the last round asks students to check four sentences from the agent's memo. Two are fine and two go beyond the data (a wrong detail about the missing row, and "margin", which the file can't show). Good debrief question: "The numbers were right. Why wasn't the memo?"
+- In the agent warm-up, the last round asks students to judge four statements. Three are quoted word for word from the agent's memo: the 64% / ฿10,497 figures are right; "missing its quantity and price" misreads the July 5 row (the price is there); and "good margin-per-sale" claims more than the data shows (there are no costs). The fourth is about what the agent did: it did NOT stay inside its folder. Answer key: true, not quite, not quite, not quite. Good debrief question: "The numbers were right. Why wasn't the memo?"
+- In Guess the Chatbot, round 3, the recorded chatbot refused to make things up both times (the invented race and the references with DOIs). It had been told not to use any tools, which some replies mention. Use that honestly: "This one was careful. Why do chatbots sometimes invent answers anyway?" Be the LLM Levels 4 and 7 answer it, including a sum the toy model gets wrong (17 + 5).
 
 ## Before class (5 minutes)
 
@@ -44,7 +45,7 @@ All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` 
 |---|---|
 | Count it | Training = counting what follows what; probability = count ÷ total |
 | Greedy writer | Generation = repeat "pick the next word"; temperature 0 can loop |
-| Dice master | Temperature reshapes the chances; T 0 = always the top word |
+| Dice master | Temperature reshapes the chances (read the bar charts; no maths): low sharpens, high flattens, T 0 = always the top word |
 | Keyhole | The context window: change the window, change the answer; "never seen this" |
 | Chat brain | A chat is "continue after A:"; back-off produces confident made-up answers |
 | Boss | All of it: 2-word window with back-off, ties, [end] |
@@ -53,9 +54,9 @@ All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` 
 
 | Stage | The idea it tests |
 |---|---|
-| Desk packer | The context window is limited; choose the right, newest, smallest facts |
+| Desk packer | The context window is limited; choose the right, newest, smallest facts (an outdated card costs 25%, a harmless extra 10%) |
 | Search sniper | Reading files is often search + pieces; wrong piece means a confident wrong answer (players tap word cards; some are traps) |
-| Tool router | The model writes text; tools do exact work; risky actions need a human |
+| Tool router | The model writes text; tools do exact work; risky actions need a human (25 s per item at factor 1, about 38 s at the default 1.5) |
 | Data detective | Agents answer data questions by writing and running small programs (players build the question by tapping and tap the answer in the result; no code to type) |
 | Injection hunter | Text inside documents can try to give the AI orders; people's instructions are just content |
 | Boss | Plan → permissions → run (three guided questions) → check → deliver a real file |
@@ -66,6 +67,11 @@ All times are estimates. The arenas' timers can be stretched with `TIME_FACTOR` 
 - Agent Arena: "In Desk packer, why could adding the whole handbook be a bad idea?" "Which planted order was hardest to spot, and why?" "In the boss, what would have happened if you had skipped the check step?"
 
 ## Things to know
+
+- **Timers.** `TIME_FACTOR` in `config.js` is 1.5 (50% more time for reading). Set it back to 1 for fluent English readers. The board shows "% right" next to points, so careful students are visible even when speed bonuses favour fast readers.
+- **Ties.** In the LLM games, when two words are seen equally often this model takes the one it saw first right after those words in its training text. Be the LLM teaches this in Levels 3 and 6; the LLM Arena uses the same rule.
+- **Tokens and Thai.** "One token ≈ ¾ of a word" is for English. Thai and many other languages need more tokens for the same meaning, so the desk fills faster. The games say this in Be the LLM Level 6 and Be the Agent Level 1.
+- **The checklist.** `checklist.html` ("Checking AI data work") gathers the data habits from all six games on one printable page. It is linked from the front page, the end of Be the Agent and the Agent Arena final card.
 
 - **Honesty about the toys.** The LLM Arena model counts words. Real models use tokens and neural networks, and see far more text. Agent Arena's search counts matching words; real tools often use smarter search. The games say this on screen.
 - **Fair but not secure.** Scores are computed in the student's browser. The board is for motivation, not grading. The CSV lets you see stage-by-stage results and spot duplicate nicknames.

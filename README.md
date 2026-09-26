@@ -4,15 +4,16 @@ Six browser games that teach beginners how chatbots and AI agents work. One site
 
 | # | Game | Kind | Time | Folder |
 |---|---|---|---|---|
-| 1 | **Guess the Chatbot** | warm-up, no score, real recorded chatbot replies | about 5 min | `pregame-llm/` |
-| 2 | **Be the LLM** | learning game, 7 levels | 25–30 min | `be-the-llm/` |
-| 3 | **LLM Arena** | timed challenge, 6 stages, class scoreboard | about 20 min | `llm-arena/` |
-| 4 | **Watch a Real Agent** | warm-up, no score, replay of a real agent run | about 6 min | `pregame-agent/` |
-| 5 | **Be the Agent** | learning game, 6 levels | 25–30 min | `be-the-agent/` |
-| 6 | **Agent Arena** | timed challenge, 6 stages, class scoreboard, no typing | about 20 min | `agent-arena/` |
+| 1 | **Guess the Chatbot** | warm-up, no score, real recorded chatbot replies | 8–12 min | `pregame-llm/` |
+| 2 | **Be the LLM** | learning game, 7 levels | 40–50 min | `be-the-llm/` |
+| 3 | **LLM Arena** | timed challenge, 6 stages, class scoreboard | 35–45 min | `llm-arena/` |
+| 4 | **Watch a Real Agent** | warm-up, no score, replay of a real agent run | 10–15 min | `pregame-agent/` |
+| 5 | **Be the Agent** | learning game, 6 levels | 45–55 min | `be-the-agent/` |
+| 6 | **Agent Arena** | timed challenge, 6 stages, class scoreboard, no typing | 40–50 min | `agent-arena/` |
 
 - `index.html` is the front page. A ✓ appears next to each game a student has finished on that device.
-- `board.html` is the teacher's scoreboard: two tabs (one per arena), live ranking, team averages and a CSV download.
+- `board.html` is the teacher's scoreboard: two tabs (one per arena), live ranking with a "% right" column, team averages and a CSV download.
+- `checklist.html` is "Checking AI data work": the six data habits from the games on one printable page.
 
 Times are estimates, not yet measured with students.
 
@@ -27,7 +28,7 @@ Everything runs in the browser, with no build step and no libraries. The warm-up
 
 ## The two warm-ups: where the "real" content comes from
 
-- **Guess the Chatbot** shows 25 real replies (5 prompts × 5 runs) recorded on 26 Sep 2026 (UTC) from the Claude model `claude-sonnet-5`. Each run was a fresh session in an AI agent tool, told to reply as in a normal chat and not to use tools. The raw record is `pregames/data/raw/llm-runs.json`; replies are shown exactly as written. We did not re-run to get "better" answers: in all 5 runs about the invented "Zentrovia Cup" the model said it had no record, and the game says so. No next-word probabilities are shown, because we could not reach an open model to record them.
+- **Guess the Chatbot** shows 30 real replies (6 prompts × 5 runs) recorded on 26 Sep 2026 (UTC) from the Claude model `claude-sonnet-5`. Each run was a fresh session in an AI agent tool, told to reply as in a normal chat and not to use tools. The raw record is `pregames/data/raw/llm-runs.json`; replies are shown exactly as written. We did not re-run to get "better" answers: in all 5 runs about the invented "Zentrovia Cup" the model said it had no record, and the game says so. A second test (added in v4) asked 5 times for academic references with DOIs on bubble-tea sales in Thailand: all 5 runs gave no reference and no DOI (`pregames/data/raw/llm-runs-references.json`), so there was nothing to look up, and the game shows exactly that. No next-word probabilities are shown, because we could not reach an open model to record them.
 - **Watch a Real Agent** replays one real run (same model, same date): a Claude agent was given `sales.csv` (made up by us, with one row left incomplete on purpose) and the owner's request. The steps are shortened excerpts of the transcript (`pregames/data/raw/agent-run.json`; "…" marks a cut), and the Excel and Word files are the real outputs. The "check its work" round uses two real slips in its memo: it says the July 5 row is missing its price (the price is there) and it talks about margin (the file has no costs).
 - `node tests/check-pregames.js` checks every reply and excerpt against the raw records, and recomputes the numbers the game states.
 
@@ -74,7 +75,7 @@ No names, emails or student IDs are stored.
 
 `config.js` also has:
 - `BOARD_REFRESH_SECONDS`: raise it for very large classes. Google limits how often a script can be called; this game was not load-tested with a real class.
-- `TIME_FACTOR`: for example, 1.5 gives everyone 50% more time.
+- `TIME_FACTOR`: 1.5 by default (50% more time for reading, set for Thai novice readers); 1 = the original timers.
 
 ## Carry-on codes and reset (learning games and whole site)
 
