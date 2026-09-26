@@ -157,6 +157,9 @@ function doGet(e) {
   var classCode = cleanClass_(p.classCode || p["class"]);
   try {
     if (action === "ping") return json_({ ok: true, time: Date.now() });
+    // The games send results as a GET (action=post&payload=...): a browser POST to Apps Script is redirected,
+    // and some browsers then lose the reply. The payload is the same JSON doPost takes.
+    if (action === "post") return doPost({ postData: { contents: String(p.payload || "{}") } });
     if (!classCode) return json_({ ok: false, error: "class code needed" });
     if (action === "board") {
       var game = cleanGame_(p.game);
