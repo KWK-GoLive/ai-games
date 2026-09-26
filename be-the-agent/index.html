@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light only">
+  <title>Be the Agent</title>
+  <meta name="description" content="A six-level game about how AI assistants read your files, use tools, and make real Excel and Word files, and how to stay in charge.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23c2570c'/%3E%3Ccircle cx='16' cy='16' r='7' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M16 5v4M16 23v4M5 16h4M23 16h4' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" id="brand" type="button" aria-label="Back to level map">Be the <span>Agent</span></button>
+    <span class="spacer"></span>
+    <span class="pill mode hidden" id="modePill"></span>
+    <a class="pill home-link" href="../index.html">&larr; All games</a>
+  </header>
+
+  <main id="app">
+    <noscript><div class="card">This game needs JavaScript switched on.</div></noscript>
+  </main>
+
+  <footer>
+    <p>Be the Agent: how AI assistants use files and tools. Everything runs in your browser; Moonbean Café is made up. Progress is saved in this browser only.
+      <button type="button" id="resetBtn">Reset my progress</button></p>
+  </footer>
+
+  <script src="config.js"></script>
+  <script src="data/cafe.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/files.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/widgets.js"></script>
+  <script src="js/levels/L1.js"></script>
+  <script src="js/levels/L2.js"></script>
+  <script src="js/levels/L3.js"></script>
+  <script src="js/levels/L4.js"></script>
+  <script src="js/levels/L5.js"></script>
+  <script src="js/levels/L6.js"></script>
+  <script src="js/summary.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
