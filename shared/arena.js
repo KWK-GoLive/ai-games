@@ -213,19 +213,23 @@
     /* ---------- home ---------- */
     function renderHome() {
       stopTimer(); clear(app); top();
+      var V = window.VIS;
       app.appendChild(h("section", { class: "card stack" },
         h("div", { class: "kicker", text: def.kicker }),
         h("h1", { text: def.title }),
-        def.intro.map(function (p) { return h("p", { text: p }); })));
+        def.intro.map(function (p) { return h("p", { text: p }); }),
+        V && def.stages ? V.flow(def.stages.map(function (sd, i) { return { label: (i + 1) + ". " + sd.name, icon: sd.icon }; }), { compact: true }) : null));
 
+      var PTS = [
+        { icon: "💯", title: "100 points", text: "for each fully right answer (some answers give part marks)." },
+        { icon: "⚡", title: "Up to +50 speed bonus", text: "shrinking as the timer runs down." },
+        { icon: "🔥", title: "Streak ×1.5", text: "from your 3rd fully right answer in a row." },
+        { icon: "💡", title: "Hints", text: "help, but halve that item's points." },
+        { icon: "🏁", title: "Only your first full run counts", text: "on the class scoreboard. After that you can practise as much as you like." }
+      ];
       app.appendChild(h("section", { class: "card soft stack" },
         h("h2", { text: "How points work" }),
-        h("ul", { class: "rules" },
-          h("li", {}, h("b", { text: "100 points" }), " for each fully right answer (some answers give part marks)."),
-          h("li", {}, h("b", { text: "Up to +50 speed bonus" }), ", shrinking as the timer runs down."),
-          h("li", {}, h("b", { text: "Streak ×1.5" }), " from your 3rd fully right answer in a row."),
-          h("li", {}, h("b", { text: "Hints" }), " help, but halve that item's points."),
-          h("li", {}, h("b", { text: "Only your first full run counts" }), " on the class scoreboard. After that you can practise as much as you like.")),
+        V ? V.cards(PTS, { cols: 3 }) : h("ul", { class: "rules" }, PTS.map(function (x) { return h("li", {}, h("b", { text: x.title }), " " + x.text); })),
         h("p", { class: "muted small", text: "6 stages, about 20 minutes. Everything the model does here is really computed in your browser, with the same rules as in the learning game." })));
 
       var run = current();
@@ -384,16 +388,17 @@
 
     function renderStageIntro(run) {
       stopTimer(); clear(app); top();
+      var V = window.VIS;
       var sd = stages[run.stage];
       var items = itemsFor(run, run.stage);
       app.appendChild(h("section", { class: "card stack" },
         h("div", { class: "kicker", text: "Stage " + (run.stage + 1) + " of " + stages.length + (run.mode === "practice" ? " · practice" : "") }),
-        h("h1", { text: sd.name }),
-        h("p", { text: sd.goal })));
+        h("h1", {}, sd.icon ? h("span", { "aria-hidden": "true", text: sd.icon + " " }) : null, sd.name),
+        h("p", { class: "goal-line", text: sd.goal })));
       var rules = h("section", { class: "card why stack" },
         h("h2", { text: "The rules" }),
-        h("ul", { class: "rules" }, sd.rules.map(function (r) { return h("li", { text: r }); })),
-        sd.example ? h("div", { class: "textbox", text: sd.example }) : null,
+        V ? V.rules(sd.rules) : h("ul", { class: "rules" }, sd.rules.map(function (r) { return h("li", { text: r }); })),
+        sd.example ? (V ? h("div", {}, h("div", { class: "small muted", text: "Example:" }), V.example(sd.example)) : h("div", { class: "textbox", text: sd.example })) : null,
         h("p", { class: "muted small", text: items.length + " item" + (items.length === 1 ? "" : "s") + ". The timer starts when you press Start." }));
       var go1 = h("button", { class: "btn primary", type: "button", text: "Start stage " + (run.stage + 1) + " →", "data-focus": "1" });
       go1.addEventListener("click", function () { if (go1.disabled) return; go1.disabled = true; renderItem(run); });
@@ -475,8 +480,8 @@
         if (!res) res = { frac: 0 };
         var sc = score({ frac: res.frac, limit: limit, remaining: timedOut ? 0 : limit - elapsed, streakBefore: streak, hint: hintUsed });
         box.classList.add("locked");
-        box.setAttribute("aria-disabled", "true");
-        Array.prototype.forEach.call(box.querySelectorAll("button, input, textarea, select"), function (el) { if (!el.classList.contains("unlock-ok")) el.disabled = true; });
+        if (!box.querySelector(".v-file")) box.setAttribute("aria-disabled", "true"); // (a made file stays usable)
+        Array.prototype.forEach.call(box.querySelectorAll("button, input, textarea, select"), function (el) { if (!el.classList.contains("unlock-ok") && !el.closest(".v-file")) el.disabled = true; }); // a made file can still be viewed/downloaded
         if (ctl.reveal) { try { ctl.reveal(ans, res); } catch (e) { /* display only */ } }
 
         run.results[run.stage] = run.results[run.stage] || [];
@@ -537,7 +542,7 @@
         h("div", { class: "kicker", text: "Stage " + (si + 1) + " complete" }),
         h("h1", { text: sd.name + ": " + pts + " points" }),
         h("p", { class: "muted", text: ok + " of " + sr.length + " fully right. Total so far: " + runTotals(run).points + " points." }),
-        sd.lesson ? h("div", { class: "card soft" }, h("b", { text: "What this stage shows: " }), sd.lesson) : null,
+        sd.lesson ? h("div", { class: "card soft lesson-card" }, h("div", { class: "lesson-icon", "aria-hidden": "true", text: "💡" }), h("div", {}, h("b", { text: "What this stage shows: " }), sd.lesson)) : null,
         sendsToBoard(run) ? statusEl() : null,
         run.complete ? null : resumeNote(run),
         h("div", { class: "row end" }, home, next)));

@@ -170,7 +170,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .timer.low > span { background: var(--warn); }
 .streak { color: var(--mode-ink); font-weight: 700; }
 .item-box.locked { pointer-events: none; }
-.item-box.locked .unlock-ok { pointer-events: auto; }
+.item-box.locked .unlock-ok, .item-box.locked .v-file { pointer-events: auto; }
 .result-card { border-left: 4px solid var(--good); }
 .result-card.bad { border-left-color: var(--warn); }
 .result-card.part { border-left-color: var(--focus); }
@@ -235,3 +235,9 @@ footer button { background: none; border: 0; color: var(--ink-2); text-decoratio
 .tabs.toggle button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .doc.good { border-color: var(--good); background: var(--good-soft); }
 .choices.one { grid-template-columns: 1fr; }
+
+/* visual additions (v3) */
+.lesson-card { display: flex; gap: 10px; align-items: flex-start; }
+.lesson-icon { font-size: 1.6rem; line-height: 1.2; }
+.goal-line { font-size: 1.05rem; }
+.search-bar { flex: 1; min-width: 12rem; min-height: 44px; display: flex; align-items: center; padding: 6px 12px; border-radius: 10px; background: var(--surface-2); font-weight: 700; }
