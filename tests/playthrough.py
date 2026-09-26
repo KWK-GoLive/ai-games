@@ -90,11 +90,14 @@ def drive_ui(page, downloads):
         for cid in key: box.locator(f".pick[data-id=\"{cid}\"]").click()
         box.get_by_role("button", name="Hand the desk to the model").click()
     elif k == "search":
-        box.locator("input").fill(key[0]); box.get_by_role("button", name="Search").click()
+        word = page.evaluate("ARENA_TEST.item.cards.find(w => ARENA_TEST.item.rank(w).win)")
+        assert word, "no winning word card"
+        box.get_by_role("group", name="word cards").get_by_role("button", name=word, exact=True).click()
+        box.get_by_role("button", name="🔍 Search").click()
     elif k == "data":
-        box.locator("input.mono").fill(i["ref"]); box.get_by_role("button", name="Run").click()
-        box.locator(".card.soft").first.wait_for()
-        box.locator("input[aria-label='your answer']").fill(key["answer"]); box.get_by_role("button", name="Submit answer").click()
+        build_query(box, i["ref"])
+        box.locator(f".tap-val[data-value=\"{key['answer']}\"]").first.click()
+        box.get_by_role("button", name="Submit answer").click()
     elif k == "docs":
         cards = box.locator(".doc")
         for n in range(i["docs"]):
@@ -105,16 +108,42 @@ def drive_ui(page, downloads):
         rows = box.locator("section:has(h3:text-matches('^B\\\\.')) .row")
         for n, p in enumerate(key["perms"]):
             rows.nth(n).get_by_role("button", name=p, exact=True).click()
-        box.locator("input.mono").fill(i["bossCmd"]); box.get_by_role("button", name="Run").click()
+        for grp, val in (("1 · What do we add up?", "total"), ("2 · One number for each …?", "branch"), ("3 · Only which rows?", "ebike")):
+            box.get_by_role("group", name=grp).locator(f'button[data-value="{val}"]').click()
+        box.get_by_role("button", name="▶ Run the table tool").click()
         box.get_by_text("That's the e-bike revenue").wait_for()
         box.locator(f".choice[data-value=\"{key['flagged']}\"]").click()
+        box.locator("button.unlock-ok").click()
+        box.get_by_role("button", name="View ebike_revenue_june.xlsx here").click()
+        assert box.locator(".v-sheet td", has_text="Station").count() >= 1, "boss file viewer shows the sheet"
         with page.expect_download() as dl:
-            box.locator("button.unlock-ok").click()
+            box.get_by_role("button", name="Download ebike_revenue_june.xlsx").click()
         path = dl.value.path(); downloads.append(open(path, "rb").read())
         box.get_by_role("button", name="Finish the job").click()
+        page.locator(".result-card").wait_for()
+        box.get_by_role("button", name="Close view of ebike_revenue_june.xlsx").click()
+        box.get_by_role("button", name="View ebike_revenue_june.xlsx here").click()  # opens it again, after the item is locked
+        assert box.locator(".v-sheet td", has_text="Station").count() >= 1, "file still viewable after Finish"
     else:
         raise AssertionError("unknown kind " + k)
     page.locator(".result-card").wait_for()
+
+ACTION_CHIP = {"SHOW": "👀 Show 5 rows", "COUNT": "🔢 Count rows", "TOTAL": "➕ Add up", "MAX": "⬆️ Biggest", "MIN": "⬇️ Smallest"}
+def build_query(box, ref):
+    """Build a table command with the tap-to-build chips (no typing) and run it."""
+    m = re.match(r"^(SHOW 5 ROWS|COUNT ROWS|(TOTAL|MAX|MIN) (\w+)(?: BY (\w+))?)(?: WHERE (\w+) ([=<>]) (\S+))?$", ref)
+    assert m, ref
+    act = ref.split()[0]
+    box.get_by_role("group", name="1 · What should the table tool do?").get_by_role("button", name=ACTION_CHIP[act]).click()
+    if m.group(3): box.get_by_role("group", name="2 · Which column?").locator(f'button[data-value="{m.group(3)}"]').click()
+    if m.group(4): box.get_by_role("group", name="3 · For each …? (optional)").locator(f'button[data-value="{m.group(4)}"]').click()
+    if m.group(5):
+        box.get_by_role("group", name="Only some rows? (optional)").locator(f'button[data-value="{m.group(5)}"]').click()
+        if box.get_by_role("group", name="… that is").count():
+            box.get_by_role("group", name="… that is").locator(f'button[data-value="{m.group(6)}"]').click()
+        box.get_by_role("group", name=re.compile("^" + m.group(5) + " ")).locator(f'button[data-value="{m.group(7)}"]').click()
+    assert box.locator(".qb-cmd").first.inner_text().endswith(ref), box.locator(".qb-cmd").first.inner_text()
+    box.get_by_role("button", name="▶ Run the table tool").click()
 
 def answer_fast(page, mode="key", seed=0):
     info(page)
@@ -149,14 +178,59 @@ def main():
         # ---------- 1. master page ----------
         pg = new_page(br)
         pg.goto(BASE + "/index.html")
-        assert pg.locator("#games .game").count() == 4
+        assert pg.locator("#games .game").count() == 6
         hrefs = pg.eval_on_selector_all("#games .game", "els => els.map(e => e.getAttribute('href'))")
-        assert hrefs == ["be-the-llm/index.html", "llm-arena/index.html", "be-the-agent/index.html", "agent-arena/index.html"], hrefs
+        assert hrefs == ["pregame-llm/index.html", "be-the-llm/index.html", "llm-arena/index.html", "pregame-agent/index.html", "be-the-agent/index.html", "agent-arena/index.html"], hrefs
         assert pg.locator(".done").count() == 0 and pg.locator(".go").count() == 1
         for h in hrefs + ["board.html"]:
             r = pg.request.get(BASE + "/" + h); assert r.ok, h
         shot(pg, "site-01-master")
-        results.append("master page: 4 games in order + board link")
+        results.append("master page: 6 games in order (2 parts) + board link")
+
+        # ---------- 1b. the two pre-games, played by tapping only ----------
+        for vp in ({"width": 390, "height": 844}, {"width": 1024, "height": 768}):
+            pg = new_page(br, viewport=vp)
+            pg.goto(BASE + "/pregame-llm/index.html")
+            pg.click("text=Start →")
+            for k in range(3):
+                pg.locator(".choice").first.click()
+                assert pg.locator(".pg-reply").count() == 5
+                pg.click("text=/Next sentence|Round 2/")
+            pg.locator(".choice").nth(2).click(); pg.click("text=Open all")
+            assert "4 different names" in pg.locator("main").inner_text()
+            pg.click("text=Round 3 →"); pg.locator(".choice").nth(1).click()
+            assert pg.locator(".pg-reply").count() == 5
+            pg.click("text=Last step →")
+            assert pg.locator("text=Play Be the LLM →").count() == 1
+            assert pg.evaluate("document.documentElement.scrollWidth") <= vp["width"]
+            pg.goto(BASE + "/pregame-agent/index.html")
+            pg.click("text=Start →")
+            pg.get_by_role("button", name="View sales.csv here").click()
+            assert pg.locator(".v-sheet td", has_text="Backpack").count() >= 5
+            pg.click("text=Watch the agent →")
+            for n in range(8):
+                if pg.locator(".choice").count(): pg.locator(".choice").nth(1).click()
+                assert pg.locator(".pg-code").count() >= 1
+                pg.click("text=/Next step|See what it sent/")
+            pg.get_by_role("button", name="View sales_summary.xlsx here").click()
+            pg.get_by_role("tab", name="Summary by Product").click()
+            assert pg.locator(".v-sheet td", has_text="6,750").count() >= 1
+            pg.get_by_role("button", name="View sales_memo.docx here").click()
+            assert "Backpacks drove the month" in pg.locator(".v-page").inner_text()
+            with pg.expect_download() as dl:
+                pg.get_by_role("button", name="Download sales_summary.xlsx").click()
+            assert open(dl.value.path(), "rb").read() == open(os.path.join(ROOT, "pregame-agent/files/sales_summary.xlsx"), "rb").read()
+            pg.click("text=Now check its work →")
+            for i, ok in enumerate([True, False, False, False]):
+                pg.locator(".pg-claim").nth(i).get_by_role("button", name=re.compile("True" if ok else "Needs")).click()
+            assert "judged 4 of 4" in pg.locator("main").inner_text()
+            pg.click("text=Last step →")
+            assert pg.evaluate("document.documentElement.scrollWidth") <= vp["width"]
+            assert not pg.errors, pg.errors
+            pg.goto(BASE + "/index.html")
+            assert pg.locator(".game[data-id=pre-llm] .done").count() == 1 and pg.locator(".game[data-id=pre-agent] .done").count() == 1
+            pg.context.close()
+        results.append("pre-games: both played by tapping at phone and iPad width; real files view + download byte-identical; ticks on the front page")
 
         # front-page sign-in is picked up by the arena ("Playing as ..."), and "Change" still works
         pg = new_page(br, MOCK_URL)
