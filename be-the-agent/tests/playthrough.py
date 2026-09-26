@@ -102,8 +102,15 @@ def play_all(page, tag, dl_dir):
     click(page, "Paste the result onto the desk")
     click(page, "Run the table tool")
     click(page, "Paste the result onto the desk")
-    page.get_by_label("table tool command").fill("TOTAL sales")
-    page.get_by_role("button", name="Run", exact=True).click()
+    # tap-to-build (no typing): "Add up total for each item"
+    page.get_by_role("group", name="1 · What should the table tool do?").get_by_role("button", name="➕ Add up").click()
+    page.get_by_role("group", name="2 · Which column?").locator('button[data-value="total"]').click()
+    page.get_by_role("group", name="3 · For each …? (optional)").locator('button[data-value="item"]').click()
+    assert page.locator(".qb-cmd").first.inner_text().endswith("TOTAL total BY item")
+    page.get_by_role("button", name="▶ Run the table tool").click()
+    page.get_by_text("In plain words: Add up total for each item").first.wait_for()
+    page.locator(".toolresult table").last.wait_for()
+    page.get_by_role("button", name=re.compile("Try a column that doesn't exist")).click()
     page.get_by_text("there is no column called").first.wait_for()
     click(page, "Run the search")
     click(page, "Paste the result onto the desk")
@@ -129,6 +136,10 @@ def play_all(page, tag, dl_dir):
     click(page, "Run the tool")
     with page.expect_download() as d1:
         page.get_by_role("button", name="Download sales_summary.xlsx").click()
+    page.get_by_role("button", name="View sales_summary.xlsx here").click()
+    assert page.locator(".v-sheet td", has_text="Latte").count() >= 1, "viewer shows the Summary sheet"
+    page.get_by_role("tab", name="Data").click()
+    assert page.locator(".v-sheet td", has_text="2026-08-01").count() >= 1, "viewer shows the Data sheet"
     xlsx_path = os.path.join(dl_dir, tag + "-sales_summary.xlsx")
     d1.value.save_as(xlsx_path)
     click(page, "Continue")
@@ -137,6 +148,8 @@ def play_all(page, tag, dl_dir):
     click(page, "Run the tool")
     with page.expect_download() as d2:
         page.get_by_role("button", name="Download memo.docx").click()
+    page.get_by_role("button", name="View memo.docx here").click()
+    assert "Total sales from 1 to 10 August were" in page.locator(".v-page").inner_text(), "viewer shows the memo"
     docx_path = os.path.join(dl_dir, tag + "-memo.docx")
     d2.value.save_as(docx_path)
     shot(page, f"{tag}-06-L4")
