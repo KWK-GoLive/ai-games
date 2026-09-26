@@ -292,6 +292,77 @@ def main():
         assert not pg.errors, pg.errors
         results.append("board page: live ranking, teams, tabs, CSV download (58 lines)")
 
+        # ---------- 3b. carry-on codes (learning games), reset everything, arena resume on another computer ----------
+        pg = new_page(br)
+        pg.goto(BASE + "/be-the-llm/index.html")
+        assert pg.locator(".level-card[disabled]").count() == 6
+        pg.fill("#carryCode", "llm3 9rqj"); pg.get_by_role("button", name="Use code").click()
+        pg.wait_for_timeout(200)
+        assert pg.locator(".level-card[disabled]").count() == 3, "code for Level 3 unlocks Level 4"
+        assert pg.locator('[data-level="L4"]').is_enabled() and not pg.locator('[data-level="L5"]').is_enabled()
+        pg.fill("#carryCode", "AGT2-28M4"); pg.get_by_role("button", name="Use code").click()
+        pg.get_by_text("That code is for the other game").wait_for()
+        pg.fill("#carryCode", "nope"); pg.get_by_role("button", name="Use code").click()
+        pg.get_by_text("doesn't match").wait_for()
+        pg.fill("#carryCode", "open-all-levels"); pg.get_by_role("button", name="Use code").click()
+        pg.wait_for_timeout(200)
+        assert pg.locator(".level-card[disabled]").count() == 0, "teacher code unlocks everything"
+        pg.goto(BASE + "/be-the-agent/index.html")
+        pg.fill("#carryCode", "AGT6-QTV5"); pg.get_by_role("button", name="Use code").click()
+        pg.wait_for_timeout(200)
+        assert pg.get_by_role("button", name="See my results").is_enabled(), "last level's code finishes the game"
+        pg.goto(BASE + "/index.html")
+        assert pg.locator(".game[data-id='agent'] .done").count() == 1, "tick on the front page"
+        pg.on("dialog", lambda d: d.accept())
+        pg.get_by_role("button", name="Reset everything on this device").click()
+        pg.wait_for_load_state()
+        pg.wait_for_timeout(300)
+        left = pg.evaluate("Object.keys(localStorage).filter(k => /be-the|aig-|ai-games/.test(k))")
+        assert left == [], left
+        assert pg.locator(".done").count() == 0
+        assert not pg.errors, pg.errors
+        results.append("carry-on codes: level code, wrong-game code, bad code, teacher code; front-page reset clears everything")
+
+        mock_ctl("/__reset")
+        pa = new_page(br, MOCK_URL)
+        pa.goto(f"{BASE}/agent-arena/index.html?test=1")
+        sign_in(pa, "Mover", "Green", "sec-7")
+        for s_ in range(2):
+            pa.click("text=/Start stage/")
+            while True:
+                answer_fast(pa, "key")
+                if "Next item" not in next_btn(pa): break
+            if s_ == 0: pa.click("text=/Next: stage/")
+        pa.get_by_text("Stage 2 complete").wait_for()
+        pa.wait_for_function("document.body.innerText.includes('Scoreboard up to date')", timeout=20000)
+        code = re.search(r"resume code is ([A-Z0-9]{4}-[A-Z0-9]{4})", pa.inner_text("body")).group(1)
+        pts_a = int(re.search(r"Total so far: (\d+) points", pa.inner_text("body")).group(1))
+        pb = new_page(br, MOCK_URL)
+        pb.goto(f"{BASE}/agent-arena/index.html?test=1")
+        pb.get_by_text("Continue on another computer").click()
+        pb.fill("#rNick", "mover"); pb.fill("#rClass", "SEC-7"); pb.fill("#rCode", code.lower().replace("-", " "))
+        pb.get_by_role("button", name="Continue my run").click()
+        pb.get_by_text("Stage 3 of 6").wait_for()
+        pb.click("text=/Start stage/")
+        answer_fast(pb, "key")
+        assert f"{pts_a + 0}" in pb.inner_text(".hud") or True
+        hud_pts = int(re.search(r"(\d+) pts", pb.inner_text(".hud")).group(1))
+        assert hud_pts == pts_a, (hud_pts, pts_a)
+        while "Next item" in next_btn(pb):
+            answer_fast(pb, "key")
+        pb.wait_for_function("document.body.innerText.includes('Scoreboard up to date')", timeout=20000)
+        brd = mock_get(action="board", game="agent", classCode="SEC-7")["players"]
+        assert len(brd) == 1 and brd[0]["done"] == 3 and brd[0]["team"] == "Green", brd
+        # wrong code is refused
+        pc = new_page(br, MOCK_URL)
+        pc.goto(f"{BASE}/agent-arena/index.html?test=1")
+        pc.get_by_text("Continue on another computer").click()
+        pc.fill("#rNick", "Mover"); pc.fill("#rClass", "SEC-7"); pc.fill("#rCode", "AAAA-BBBB")
+        pc.get_by_role("button", name="Continue my run").click()
+        pc.get_by_text("No run found").wait_for()
+        assert not pa.errors and not pb.errors and not pc.errors
+        results.append(f"arena resume code: stages 1-2 on one computer, stage 3 on another ({code}); points carried over, one player on the board")
+
         # ---------- 4. resume after reload + time-outs ----------
         pg = new_page(br, "", factor=0.03)  # ~1-3 s per item
         pg.goto(f"{BASE}/agent-arena/index.html?test=1")

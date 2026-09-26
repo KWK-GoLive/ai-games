@@ -59,5 +59,18 @@ check(S.doPost({ game: "llm" }).fatal === true, "a bad row is marked fatal so th
 post({ nickname: "Num", runId: "n1", stage: 1, classCode: "01" });
 check(S.doGet({ action: "board", game: "llm", classCode: "01" }).players.length === 1, "class code 01 stays text");
 
+// resume on another computer
+S.reset();
+post({ nickname: "Res", runId: "ABCD-EFGH", stage: 0, items: 0, team: "Green" });
+post({ nickname: "Res", runId: "ABCD-EFGH", stage: 1, items: 5, correct: 4, points: 500, seconds: 70, hints: 1 });
+post({ nickname: "Res", runId: "ABCD-EFGH", stage: 2, items: 3, correct: 1, points: 150, seconds: 90, hints: 0 });
+var rs = S.doGet({ action: "resume", game: "llm", classCode: "sec1", nickname: "res", runId: "abcd-efgh" });
+check(rs.found && rs.counted && rs.team === "Green" && rs.stages.length === 2 && rs.stages[0].points === 500 && rs.stages[1].stage === 2, "resume finds the run: " + JSON.stringify(rs));
+check(S.doGet({ action: "resume", game: "llm", classCode: "sec1", nickname: "Other", runId: "ABCD-EFGH" }).found === false, "resume needs the right nickname");
+check(S.doGet({ action: "resume", game: "agent", classCode: "sec1", nickname: "Res", runId: "ABCD-EFGH" }).found === false, "resume needs the right game");
+check(S.doGet({ action: "resume", game: "llm", classCode: "sec2", nickname: "Res", runId: "ABCD-EFGH" }).found === false, "resume needs the right class");
+post({ nickname: "Res", runId: "ABCD-EFGH", stage: 3, items: 5, points: 200 });
+check(S.doGet({ action: "board", game: "llm", classCode: "SEC1" }).players[0].points === 850, "stages sent from the second computer add to the same run");
+
 console.log(fails ? fails + " check(s) FAILED" : "All backend checks passed");
 process.exit(fails ? 1 : 0);
