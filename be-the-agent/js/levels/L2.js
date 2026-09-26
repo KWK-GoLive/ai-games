@@ -102,12 +102,66 @@
           row.appendChild(w.onceBtn(r + 1 < D.fileQuestions.length ? "Next question" : "Continue", function () {
             btns.forEach(function (x) { x.disabled = true; });
             r++;
-            if (r < D.fileQuestions.length) round(); else quiz();
+            if (r < D.fileQuestions.length) round(); else searchPractice();
           }));
           answerBox.appendChild(row);
         }
       }
       round();
+
+      /* ---- v4: you choose the search words (practice for the Agent Arena's Search sniper) ---- */
+      function searchPractice() {
+        var P = D.searchPractice, MAXW = 3, TRIES = 3, tries = 0, picked = [];
+        var tgt = chunks.filter(function (c) { return c.id === P.target; })[0];
+        var winners = P.cards.filter(function (c) { var r0 = E.search(c, chunks); return r0[0].chunk.id === P.target && r0[0].score > r0[1].score; });
+        var sec = h("section", { class: "card stack" },
+          h("div", { class: "row" }, w.roleTag("harness")),
+          h("div", { class: "kicker", text: "Your turn: choose the search words" }),
+          h("div", { class: "chat" }, w.bubble("you", P.q)),
+          h("p", { text: "This time you pick the words the search tool looks for. It counts how many of your words each piece contains, and puts the best piece first. Tap up to 3 word cards, then Search. Get the piece that answers the question to #1, on its own." }));
+        var chips = h("div", { class: "qb-chips", role: "group", "aria-label": "word cards" });
+        var bar = h("div", { class: "search-bar", "aria-live": "polite" });
+        var go = h("button", { class: "btn primary", type: "button", text: "🔍 Search" });
+        var msg = h("p", { class: "feedback", "aria-live": "polite" });
+        var out = h("div", { class: "stack" });
+        var cardBtns = P.cards.map(function (word) {
+          var b = h("button", { type: "button", class: "qb-chip", "aria-pressed": "false", text: word });
+          b.addEventListener("click", function () {
+            var i = picked.indexOf(word);
+            if (i >= 0) picked.splice(i, 1); else if (picked.length < MAXW) picked.push(word);
+            paint();
+          });
+          chips.appendChild(b);
+          return b;
+        });
+        function paint() {
+          cardBtns.forEach(function (b, i) { b.setAttribute("aria-pressed", String(picked.indexOf(P.cards[i]) >= 0)); });
+          bar.textContent = picked.length ? "🔍 " + picked.join(" ") : "🔍 (tap up to 3 word cards)";
+          go.disabled = !picked.length || tries >= TRIES;
+        }
+        go.addEventListener("click", function () {
+          if (!picked.length || tries >= TRIES) return;
+          tries++;
+          var res = E.search(picked.join(" "), chunks);
+          var win = res[0].chunk.id === P.target && res[0].score > 0 && res[0].score > res[1].score;
+          ui.clear(out);
+          res.slice(0, 3).forEach(function (x, i) {
+            out.appendChild(h("div", { class: "chunk" + (i === 0 && win ? " on" : "") },
+              h("span", { class: "meta", text: "#" + (i + 1) + " · " + x.score + " matching word" + (x.score === 1 ? "" : "s") + (x.matched.length ? " (" + x.matched.join(", ") + ")" : "") }),
+              h("span", {}, h("b", { text: x.chunk.title + ": " }), x.chunk.text)));
+          });
+          if (win) { points += tries === 1 ? 20 : 10; msg.className = "feedback good"; msg.textContent = "✓ “" + tgt.title + "” is on top, on its own. The model would now answer from the right piece."; go.disabled = true; next(); }
+          else if (tries >= TRIES) { msg.className = "feedback bad"; msg.textContent = "Out of tries. Words that appear only in the “" + tgt.title + "” piece work best, like “" + winners.slice(0, 2).join("” or “") + "”."; go.disabled = true; next(); }
+          else { msg.className = "feedback bad"; msg.textContent = res[0].score === 0 ? "No piece has those words. Try others." : res[0].score === res[1].score ? "A tie at the top: the search can't tell which piece is best. Try more specific words." : "The top piece isn't the one that answers the question. Some words appear in several pieces."; picked = []; paint(); }
+        });
+        function next() { sec.appendChild(h("p", { class: "small muted", text: "Good search words appear in the right piece and in no other. Real search tools also match meanings, not just words, but they can still bring back the wrong piece." })); sec.appendChild(h("div", { class: "row end" }, w.onceBtn("Continue", quiz))); }
+        sec.appendChild(chips);
+        sec.appendChild(h("div", { class: "row" }, bar, go));
+        sec.appendChild(msg); sec.appendChild(out);
+        container.appendChild(sec);
+        sec.scrollIntoView({ behavior: "smooth", block: "start" });
+        paint();
+      }
 
       function quiz() {
         var box = h("section", { class: "card stack" }, h("div", { class: "kicker", text: "Check yourself" }));

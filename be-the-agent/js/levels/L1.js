@@ -10,8 +10,8 @@
     desc: "Why a chatbot forgets things, even your name.",
     goal: "Everything the model can use has to be on its “desk”. You'll watch the desk fill up during a chat, see what falls off, and find out what happens when you start a new chat.",
     intro: [
-      { title: "The model only sees what's on its desk.", text: "Every time it writes a reply, the app puts text in front of it: some instructions, your conversation, any files. That text is all it has. This desk is called the context window." },
-      { title: "The desk has a size limit, measured in tokens.", text: "A token is a small piece of text. In English, one token is roughly three-quarters of a word, so 100 words is about 130 tokens.", ex: "“Welcome to Moonbean Café”  ≈ 4 words ≈ 6 tokens" },
+      { title: "The model only sees what's on its desk.", text: "Every time it writes a reply, the app puts text in front of it: some instructions, your conversation, any files, sometimes a how-to guide (a “skill”). That text is all it has. This desk is called the context window. Remember the keyhole in Be the LLM? That was the context window too. Here we picture it as a desk, and measure it in tokens instead of words." },
+      { title: "The desk has a size limit, measured in tokens.", text: "A token is a small piece of text. In English, one token is roughly three-quarters of a word, so 100 words is about 130 tokens. Other languages, including Thai, often need more tokens for the same meaning, so the desk fills faster.", ex: "“Welcome to Moonbean Café”  ≈ 4 words ≈ 6 tokens" },
       { title: "Your job:", text: "you are the app, the program around the model (people who build these call it the harness). Put things on the desk, keep the chat going, and see what the model can and can't answer. Our toy desk holds " + (((window.BTA_CONFIG || {}).DESK_TOKENS) || 200) + " tokens; real chatbots hold far more, but the idea is the same." }
     ],
     recap: {

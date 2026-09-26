@@ -96,36 +96,63 @@
               box.appendChild(h("div", { class: "chat" }, w.bubble("ai", "Total sales in sales.csv were " + w.fmt(r.value) + " THB.")));
               points += 10;
               var out = h("div", { class: "stack" });
+              // The table tool with filters, biggest and smallest (the same tool as in the Agent Arena).
+              var TT = (window.AGA && window.AGA.Tools) ? function (c) { return window.AGA.Tools.run(D.salesCsv, c); } : function (c) { return E.runTable(D.salesCsv, c); };
+              var TASK_CMD = "TOTAL total WHERE item = Latte", taskAnswer = String(TT(TASK_CMD).value);
+              var taskDone = false, wrongTaps = 0;
+              var taskMsg = h("p", { class: "feedback", "aria-live": "polite" });
+              var taskNext = h("div", { class: "row end" });
+              function tapBtn(label, value) {
+                var b = h("button", { type: "button", class: "tap-val", "data-value": value, "aria-label": "Answer: " + label, text: label });
+                b.addEventListener("click", function () {
+                  if (taskDone) return;
+                  if (value === taskAnswer) {
+                    taskDone = true; points += 10;
+                    taskMsg.className = "feedback good";
+                    taskMsg.textContent = "✓ Right: Lattes earned " + w.fmt(Number(taskAnswer)) + " THB. You asked the tool, it did the exact sum, and you read the answer from its result. That's what an agent does.";
+                    taskNext.appendChild(h("p", { class: "small muted", style: "flex:1", text: "Want more practice? Try “the biggest single Latte sale” (⬆️ Biggest → total → only where item … Latte) or “how many sales were on 2026-08-05” (🔢 Count rows → only where date …)." }));
+                    taskNext.appendChild(w.onceBtn("Continue", searchStep));
+                  } else {
+                    wrongTaps++;
+                    taskMsg.className = "feedback bad";
+                    taskMsg.textContent = "That's not the Latte total." + (wrongTaps >= 2 ? " Hint: ➕ Add up → total → only where item … → Latte." : " Check what your question asked for.");
+                  }
+                });
+                return b;
+              }
               function show(cmd, res) {
                 ui.clear(out);
                 out.appendChild(w.toolCall("table", "sales.csv: " + cmd));
                 if (!res.ok) out.appendChild(w.toolResult(res.error, false));
+                else if (res.groups) out.appendChild(w.toolResult(h("div", { class: "stack" }, h("span", { text: res.text }),
+                  h("div", { class: "tap-grid" }, res.groups.map(function (g) { return [tapBtn(String(g[0]), String(g[0])), tapBtn(w.fmt(g[1]), String(g[1]))]; })))));
                 else if (res.table) out.appendChild(w.toolResult(w.tableEl(res.table)));
+                else if (typeof res.value === "number") out.appendChild(w.toolResult(h("div", { class: "stack" }, h("span", { text: res.text }), h("div", {}, tapBtn(w.fmt(res.value), String(res.value))))));
                 else out.appendChild(w.toolResult(res.text));
               }
               var tryBox;
               if (window.QB && window.QB.create) {
-                var qb = window.QB.create({ csv: D.salesCsv, parse: E.parseCsv, run: function (c) { return E.runTable(D.salesCsv, c); },
-                  actions: ["show", "count", "total"], where: false, file: "sales.csv", onRun: show });
+                var qb = window.QB.create({ csv: D.salesCsv, parse: E.parseCsv, run: TT, file: "sales.csv", onRun: show,
+                  actions: window.AGA && window.AGA.Tools ? ["show", "count", "total", "max", "min"] : ["show", "count", "total"], where: !!(window.AGA && window.AGA.Tools) });
                 tryBox = h("div", { class: "card soft stack" },
-                  h("b", { text: "Try the table tool yourself" }),
-                  h("p", { class: "small muted", text: "Tap to build a question, e.g. “Add up total for each item” or “Add up qty for each date”. Underneath you'll see the command the model would write for the tool." }),
+                  h("b", { text: "Your turn: ask the table tool" }),
+                  h("div", { class: "v-card accent" }, h("div", { class: "v-card-title", text: "🎯 Task: how much did Lattes earn in total?" }),
+                    h("p", { class: "small", style: "margin:4px 0 0", text: "Build the question by tapping, run it, then tap the number in the result that answers it. You can add up, count, find the biggest or smallest, split the answer “for each” item or date, and look at only some rows (“only where item is …”)." })),
                   qb.el,
                   h("div", { class: "row" }, (function () {
                     var bad = h("button", { class: "btn", type: "button", text: "❌ Try a column that doesn't exist: “sales”" });
-                    bad.addEventListener("click", function () { show("TOTAL sales", E.runTable(D.salesCsv, "TOTAL sales")); });
+                    bad.addEventListener("click", function () { show("TOTAL sales", TT("TOTAL sales")); });
                     return bad;
                   })(), h("span", { class: "small muted", text: "to see what the tool does with a wrong request" })),
-                  out);
+                  out, taskMsg, taskNext);
               } else {
-                var inp = h("input", { class: "text-input", type: "text", value: "TOTAL total BY item", "aria-label": "table tool command" });
+                var inp = h("input", { class: "text-input", type: "text", value: TASK_CMD, "aria-label": "table tool command" });
                 var runBtn = h("button", { class: "btn", type: "button", text: "Run" });
-                runBtn.addEventListener("click", function () { show(inp.value, E.runTable(D.salesCsv, inp.value)); });
+                runBtn.addEventListener("click", function () { show(inp.value, TT(inp.value)); });
                 tryBox = h("div", { class: "card soft stack" }, h("b", { text: "Try the table tool yourself" }),
-                  h("div", { class: "row" }, h("div", { style: "flex:1;min-width:180px" }, inp), runBtn), out);
+                  h("div", { class: "row" }, h("div", { style: "flex:1;min-width:180px" }, inp), runBtn), out, taskMsg, taskNext);
               }
               box.appendChild(tryBox);
-              searchStep();
             })));
           })));
         }
