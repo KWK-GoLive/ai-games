@@ -27,14 +27,13 @@ function sheet_() {
   }
   return sh;
 }
-var TEXT_COLS = [2, 4, 5, 6, 8]; // classCode, runId, nickname, team, stageName
 // Add a row. The text columns of the new row are set to Plain text BEFORE the values go in,
 // so Sheets never turns a class code like "01" or "1-2" into a number or a date.
 function addRow_(sh, values) {
   var r = sh.getLastRow() + 1;
   if (r > sh.getMaxRows()) sh.insertRowsAfter(sh.getMaxRows(), 100);
   while (String(sh.getRange(r, 1).getValue()) !== "") r++; // never overwrite a row (belt and braces with the lock)
-  TEXT_COLS.forEach(function (c) { sh.getRange(r, c).setNumberFormat("@"); });
+  sh.getRange(r, 2, 1, 7).setNumberFormat("@"); // columns B-H in one call (fast); readRows_ turns stage back into a number
   sh.getRange(r, 1, 1, values.length).setValues([values]);
   SpreadsheetApp.flush(); // write now, before the lock is released, so the next request sees this row
 }
@@ -131,7 +130,7 @@ function doPost(e) {
     var runId = clean_(d.runId, 40), stage = Number(d.stage);
     if (!game || !classCode || !nick || !runId || d.stage === "" || d.stage == null || !(stage >= 0 && stage <= STAGES && stage === Math.floor(stage)))
       return json_({ ok: false, fatal: true, error: "missing or invalid fields" });
-    lock.waitLock(20000);
+    lock.waitLock(28000);
     var sh = sheet_();
     var mine = readRows_().filter(function (r) { return r.game === game && r.classCode === classCode; });
     var first = countedRuns_(mine.filter(function (r) { return r.nickname.toLowerCase() === nick.toLowerCase(); }))[nick.toLowerCase()];
